@@ -130,7 +130,7 @@ class BaseModule:
         raise
 
     def get_object(self, id_or_ref, ws=None):
-        res = self.ws_get_objects({"objects": [self.process_workspace_identifiers(id_or_ref, ws)]})
+        res = self.ws_get_objects({"objects": [self.process_ws_ids(id_or_ref, ws)]})
         if res is None:
             return None
         return res["data"][0]
