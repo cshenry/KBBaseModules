@@ -135,7 +135,7 @@ class BaseModule:
 
     def get_object(self, id_or_ref, ws=None):
         res = self.ws_get_objects({"objects": [self.process_ws_ids(id_or_ref, ws)]})
-        self.print_json_debug_file(res,"TestGenome.json")
+        self.print_json_debug_file("TestGenome.json",res)
         if res is None:
             return None
         return res["data"][0]
