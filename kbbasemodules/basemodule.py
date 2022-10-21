@@ -8,11 +8,11 @@ import re
 import time
 import sys
 from os.path import exists
-from json import JSONEncoder
+#from json import JSONEncoder
 
-class MyEncoder(JSONEncoder):
-    def default(self, o):
-        return o.__dict__
+#class MyEncoder(JSONEncoder):
+def default_encoder(o):
+    return o.__dict__
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
@@ -66,7 +66,7 @@ class BaseModule:
                 
     def print_json_debug_file(self,filename,data):
         with open(self.working_dir+'/'+filename, 'w') as f:
-            json.dump(data, f,indent=4,cls=MyEncoder)
+            json.dump(data, f,indent=4,default=default_encoder)
     
     #########WORKSPACE RELATED FUNCTIONS#######################
     def provenance(self):
