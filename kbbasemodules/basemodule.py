@@ -58,6 +58,10 @@ class BaseModule:
         for key in key_list:
             if key in api_output:
                 output[key] = api_output[key]
+                
+    def print_json_debug_file(self,filename,data):
+        with open(self.working_dir+'/'+filename, 'w') as f:
+            json.dump(data, f)
     
     #########WORKSPACE RELATED FUNCTIONS#######################
     def provenance(self):
@@ -131,6 +135,7 @@ class BaseModule:
 
     def get_object(self, id_or_ref, ws=None):
         res = self.ws_get_objects({"objects": [self.process_ws_ids(id_or_ref, ws)]})
+        self.print_json_debug_file(res,"TestGenome.json")
         if res is None:
             return None
         return res["data"][0]
