@@ -66,7 +66,7 @@ class BaseModule:
                 
     def print_json_debug_file(self,filename,data):
         with open(self.working_dir+'/'+filename, 'w') as f:
-            json.dump(data, f,indent=4,default=default_encoder)
+            json.dump(data, f,indent=4,skipkeys=True)
     
     #########WORKSPACE RELATED FUNCTIONS#######################
     def provenance(self):
