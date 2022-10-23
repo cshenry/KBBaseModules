@@ -31,7 +31,8 @@ class BaseModule:
         self.initialized = False
         self.ws_id = None
         self.ws_name = None
-        self.timestamp = time.time()
+        ts = time.gmtime()
+        self.timestamp = time.strftime("%Y-%m-%d %H:%M:%S", ts)
         self.validate_args(self.config,[],{
             "max_retry":3,
             "version":0
