@@ -33,9 +33,7 @@ class BaseModule:
         })
         self.token = token
         self.name = name
-        print(module_dir)
         self.module_dir = module_dir
-        print(self.module_dir)
         #Initializing working directory if specified, otherwise using config scratch
         if working_dir:
             self.working_dir = working_dir
