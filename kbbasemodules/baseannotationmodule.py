@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 class BaseAnnotationModule(BaseModule):
     def __init__(self,name,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
         BaseModule.__init__(self,name,config,module_dir,working_dir,token,clients,callback)
-        self.genome_info_hash = {}
-        self.annodata = {"Genomes":[],"Gene":[],"Type":[],"Function":[],"Score type":[],"Score":[]}
+        self.object_info_hash = {}
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
     
@@ -24,21 +23,22 @@ class BaseAnnotationModule(BaseModule):
             self.clients["cb_annotation_ontology_api"] = cb_annotation_ontology_api(self.callback_url,token=self.token)
         return self.clients["cb_annotation_ontology_api"]
     
-    def genome_to_proteins(self,ref):
+    def object_to_proteins(self,ref):
         output = self.get_object(ref,self.ws_id)
-        self.genome_info_hash[ref] = output["info"]
+        self.object_info_hash[ref] = output["info"]
         sequence_list = []
+        #TODO: add support for other object types
         for ftr in output["data"]["features"]:
             if "protein_translation" in ftr:
                 sequence_list.append([ftr["id"],ftr["protein_translation"]])
         return sequence_list
     
-    def process_genome_list(self,reference_list):
-        genome_list = []
-        for ref in reference_list:
+    def process_object_list(self,input_references):
+        output_references = []
+        for ref in input_references:
             #TODO: add support for genomesets
-            genome_list.append(ref)
-        return genome_list
+            output_references.append(ref)
+        return output_references
     
     def add_annotations_to_genome(self,genome_ref,suffix,annotations):
         """Loads specified gene annotation into KBase genome object
@@ -66,24 +66,11 @@ class BaseAnnotationModule(BaseModule):
                 if geneid not in ontology_inputs[ontology]:
                     ontology_inputs[ontology][geneid] = []
                 for term in annotations[geneid][ontology]:
-                    suffix = "" 
                     anno_data = {"term": term}
                     if "scores" in annotations[geneid][ontology][term]:
-                        anno_data["metadata"] = [annotations[geneid][ontology][term]]
-                        suffix = ";"+annotations[geneid][ontology][term]["scores"][1]+"="+str(annotations[geneid][ontology][term]["scores"][2])
-                        self.annodata["Score"].append(annotations[geneid][ontology][term]["scores"][2])
-                        self.annodata["Score type"].append(annotations[geneid][ontology][term]["scores"][1])
-                    else:
-                        self.annodata["Score"].append(None)
-                        self.annodata["Score type"].append(None)
+                        anno_data["metadata"] = {"scores":annotations[geneid][ontology][term]["scores"]}
                     if "name" in annotations[geneid][ontology][term]:
                         anno_data["name"] = annotations[geneid][ontology][term]["name"]+suffix
-                    else:
-                        anno_data["suffix"] = suffix
-                    self.annodata["Genomes"].append(genome_ref)
-                    self.annodata["Gene"].append(geneid)
-                    self.annodata["Type"].append(ontology)
-                    self.annodata["Function"].append(term)
                     ontology_inputs[ontology][geneid].append(anno_data)
                         
         anno_api_input = {
@@ -104,5 +91,5 @@ class BaseAnnotationModule(BaseModule):
                 "ontology_terms":ontology_inputs[ontology]
             })
         anno_api_output = self.anno_client().add_annotation_ontology_events(anno_api_input)
-        self.obj_created.append({"ref":anno_api_output["output_ref"],"description":"Saving PDB annotation for "+self.genome_info_hash[ref][1]})
+        self.obj_created.append({"ref":anno_api_output["output_ref"],"description":"Saving PDB annotation for "+self.object_info_hash[ref][1]})
         return anno_api_output
