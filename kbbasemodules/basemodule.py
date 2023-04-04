@@ -40,18 +40,7 @@ class BaseModule:
             self.working_dir = working_dir
         else:
             self.working_dir = config['scratch']
-        #Initializing stores tracking objects created and input objects
-        self.obj_created = []
-        self.input_objects = []
-        #Initializing attributes tracking method data to support provencance and context
-        self.method = None
-        self.params = {}
-        self.initialized = False
-        self.ws_id = None
-        self.ws_name = None
-        #Computing timestamp
-        ts = time.gmtime()
-        self.timestamp = time.strftime("%Y-%m-%d %H:%M:%S", ts)
+        self.reset_attributes()
     
     #########METHOD CALL INITIALIZATION FUNCTIONS#######################
     def initialize_call(self,method,params,print_params=False):
@@ -65,6 +54,20 @@ class BaseModule:
                 self.set_ws(params["workspace"])
             if print_params:
                 logger.info(method+":"+json.dumps(params,indent=4))
+                
+    def reset_attributes(self):
+        #Initializing stores tracking objects created and input objects
+        self.obj_created = []
+        self.input_objects = []
+        #Initializing attributes tracking method data to support provencance and context
+        self.method = None
+        self.params = {}
+        self.initialized = False
+        self.ws_id = None
+        self.ws_name = None
+        #Computing timestamp
+        ts = time.gmtime()
+        self.timestamp = time.strftime("%Y-%m-%d %H:%M:%S", ts)
     
     #########CLIENT RETRIEVAL AND INITIALIZATION FUNCTIONS#######################
     def ws_client(self):
