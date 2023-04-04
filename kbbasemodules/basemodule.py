@@ -22,6 +22,7 @@ class BaseModule:
     def __init__(self,name,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
         #Initializing flexible container for client libraries which will be lazy loaded as needed
         self.clients = {}
+        self.callback_url = callback
         for item in clients:
             self.clients[item] = clients[item]
         #Initializing config, name, and token
