@@ -134,9 +134,6 @@ class BaseModule:
             self.ws_name = workspace
             info = self.ws_client().get_workspace_info({"workspace":workspace})
             self.ws_id = info[0]
-        print("WSID:"+self.ws_id)
-        print("WSname:"+self.ws_name)
-        print("WS:"+workspace)
     
     def process_ws_ids(self,id_or_ref,workspace=None,no_ref=False):
         """
