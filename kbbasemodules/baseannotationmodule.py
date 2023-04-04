@@ -40,7 +40,7 @@ class BaseAnnotationModule(BaseModule):
             output_references.append(ref)
         return output_references
     
-    def add_annotations_to_object(self,genome_ref,suffix,annotations):
+    def add_annotations_to_object(self,reference,suffix,annotations):
         """Loads specified gene annotation into KBase genome object
         
         Parameters
@@ -74,8 +74,8 @@ class BaseAnnotationModule(BaseModule):
                     ontology_inputs[ontology][geneid].append(anno_data)
                         
         anno_api_input = {
-            "input_ref":genome_ref,
-            "output_name":self.object_info_hash[genome_ref][1]+suffix,
+            "input_ref":reference,
+            "output_name":self.object_info_hash[reference][1]+suffix,
             "output_workspace":self.ws_id,
             "overwrite_matching":1,
             "save":1,
@@ -91,5 +91,5 @@ class BaseAnnotationModule(BaseModule):
                 "ontology_terms":ontology_inputs[ontology]
             })
         anno_api_output = self.anno_client().add_annotation_ontology_events(anno_api_input)
-        self.obj_created.append({"ref":anno_api_output["output_ref"],"description":"Saving PDB annotation for "+self.object_info_hash[ref][1]})
+        self.obj_created.append({"ref":anno_api_output["output_ref"],"description":"Saving annotation for "+self.object_info_hash[reference][1]})
         return anno_api_output
