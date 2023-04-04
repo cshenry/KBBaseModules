@@ -75,7 +75,7 @@ class BaseAnnotationModule(BaseModule):
                         
         anno_api_input = {
             "input_ref":genome_ref,
-            "output_name":self.get_genome_info(genome_ref)[1]+suffix,
+            "output_name":self.object_info_hash[genome_ref][1]+suffix,
             "output_workspace":self.ws_id,
             "overwrite_matching":1,
             "save":1,
