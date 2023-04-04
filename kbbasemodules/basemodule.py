@@ -243,8 +243,8 @@ class BaseModule:
     </body>
     </html>
     """
-        os.makedirs(self.module_dir+"/html", exist_ok=True)
-        with open(self.module_dir+"/html/index.html", 'w') as f:
+        os.makedirs(self.working_dir+"/html", exist_ok=True)
+        with open(self.working_dir+"/html/index.html", 'w') as f:
             f.write(html_data)
-        with open(self.module_dir+"/html/data.json", 'w') as f:
+        with open(self.working_dir+"/html/data.json", 'w') as f:
             f.write(json_str)
