@@ -40,7 +40,7 @@ class BaseAnnotationModule(BaseModule):
             output_references.append(ref)
         return output_references
     
-    def add_annotations_to_genome(self,genome_ref,suffix,annotations):
+    def add_annotations_to_object(self,genome_ref,suffix,annotations):
         """Loads specified gene annotation into KBase genome object
         
         Parameters
