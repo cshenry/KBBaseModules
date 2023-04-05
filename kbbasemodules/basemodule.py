@@ -210,7 +210,7 @@ class BaseModule:
                          'objects_created': self.obj_created,
                          'workspace_name': self.ws_name,
                          'report_object_name': report_name})
-        return {"report_name":report_name,"report_ref":output["ref"],'workspace_name':self.api.ws_name}
+        return {"report_name":report_name,"report_ref":output["ref"],'workspace_name':self.ws_name}
     
     def build_dataframe_report(self,table,column_list):        
         #Convert columns to this format:
