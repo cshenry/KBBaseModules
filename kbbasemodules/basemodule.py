@@ -52,6 +52,8 @@ class BaseModule:
             self.initialized = True
             if "workspace" in params:
                 self.set_ws(params["workspace"])
+            elif "output_workspace" in params:
+                self.set_ws(params["output_workspace"])
             if print_params:
                 logger.info(method+":"+json.dumps(params,indent=4))
                 
@@ -87,6 +89,12 @@ class BaseModule:
             from installed_clients.DataFileUtilClient import DataFileUtil
             self.clients["DataFileUtil"] = DataFileUtil(self.callback_url,token=self.token)
         return self.clients["DataFileUtil"]
+    
+    def gfu_client(self):
+        if "GenomeFileUtil" not in self.clients:
+            from installed_clients.GenomeFileUtilClient import GenomeFileUtil
+            self.clients["GenomeFileUtil"] = GenomeFileUtil(self.callback_url,token=self.token)
+        return self.clients["GenomeFileUtil"]
 
     #########GENERAL UTILITY FUNCTIONS#######################
     def validate_args(self,params,required,defaults):

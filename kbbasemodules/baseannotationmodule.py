@@ -68,7 +68,7 @@ class BaseAnnotationModule(BaseModule):
                 for term in annotations[geneid][ontology]:
                     anno_data = {"term": term}
                     if "scores" in annotations[geneid][ontology][term]:
-                        anno_data["metadata"] = {"scores":annotations[geneid][ontology][term]["scores"]}
+                        anno_data["evidence"] = {"scores":annotations[geneid][ontology][term]["scores"]}
                     if "name" in annotations[geneid][ontology][term]:
                         anno_data["name"] = annotations[geneid][ontology][term]["name"]+suffix
                     ontology_inputs[ontology][geneid].append(anno_data)
