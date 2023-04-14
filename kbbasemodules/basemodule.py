@@ -244,7 +244,7 @@ class BaseModule:
                     "url": "data.json",
                     "dataSrc": ""
                 },
-                "columns": {json.dumps(columns,indent=4)}
+                "columns": {"""+json.dumps(columns,indent=4)+"""}
             } );
         } );
     </script>
