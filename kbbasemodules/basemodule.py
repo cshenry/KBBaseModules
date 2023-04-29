@@ -15,8 +15,8 @@ from os.path import exists
 #    return o.__dict__
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
-    level=logging.INFO)
+#logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
+#    level=logging.INFO)
 
 class BaseModule:
     def __init__(self,name,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
@@ -241,10 +241,9 @@ class BaseModule:
         $(document).ready(function() {
             $('#example').DataTable( {
                 "ajax": {
-                    "url": "data.json",
-                    "dataSrc": ""
+                    "url": "data.json"
                 },
-                "columns": {"""+json.dumps(columns,indent=4)+"""}
+                "columns": """+json.dumps(columns,indent=4)+"""
             } );
         } );
     </script>
