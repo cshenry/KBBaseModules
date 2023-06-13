@@ -15,8 +15,9 @@ from os.path import exists
 #    return o.__dict__
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
-    level=logging.INFO)
+logger.setLevel(
+    logging.INFO
+) 
 
 class BaseModule:
     def __init__(self,name,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
