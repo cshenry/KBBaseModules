@@ -22,8 +22,8 @@ class BaseModelingModule(BaseModule):
         BaseModule.__init__(self,name,config,module_dir,working_dir,token,clients,callback)
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
-        #self.kbase_api = cobrakbase.KBaseAPI(token="...")
-        self.kbase_api = cobrakbase.KBaseCache(token=token,dev=True)
+        self.kbase_api = cobrakbase.KBaseAPI(token=token)
+        #self.kbase_api = cobrakbase.KBaseCache(token=token,dev=True)
         self.kbase_api.ws_client = self.ws_client()
     
     #################Genome functions#####################
