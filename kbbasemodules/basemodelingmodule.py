@@ -40,10 +40,10 @@ class BaseModelingModule(BaseModule):
     
     #################Classifier functions#####################
     def get_classifier(self):
-        #cls_pickle = self.module_dir+"/data/knn_ACNP_RAST_full_01_17_2023.pickle"
-        #cls_features = self.module_dir+"/data/knn_ACNP_RAST_full_01_17_2023_features.json"
-        cls_pickle = self.module_dir+"/data/knn_ACNP_RAST_filter.pickle"
-        cls_features = self.module_dir+"/data/knn_ACNP_RAST_filter_features.json"
+        cls_pickle = self.config["data"]+"/knn_ACNP_RAST_full_01_17_2023.pickle"
+        cls_features = self.config["data"]+"/knn_ACNP_RAST_full_01_17_2023_features.json"
+        #cls_pickle = self.module_dir+"/data/knn_ACNP_RAST_filter.pickle"
+        #cls_features = self.module_dir+"/data/knn_ACNP_RAST_filter_features.json"
         with open(cls_pickle, 'rb') as fh:
             model_filter = pickle.load(fh)
         with open(cls_features, 'r') as fh:
