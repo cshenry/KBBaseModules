@@ -133,7 +133,7 @@ class BaseModule:
     def set_ws(self,workspace):
         if self.ws_id == workspace or self.ws_name == workspace:
             return 
-        if not isinstance(workspace, str) or re.search('^\d+$',workspace) != None:
+        if not isinstance(workspace, str) or re.search('^\\d+$',workspace) != None:
             if isinstance(workspace, str):
                 workspace = int(workspace)
             self.ws_id = workspace
@@ -207,9 +207,7 @@ class BaseModule:
         files = []
         rootDir = self.working_dir+"/html/"
         for dirName, subdirList, fileList in os.walk(rootDir):
-            print('Found directory: %s' % dirName)
             for fname in fileList:
-                print('\t%s' % fname)
                 files.append({'path': dirName,'name': fname,'description': 'HTML report for PDB upload'})
         report_name = self.method+"-"+str(uuid.uuid4())
         output = self.report_client().create_extended_report({'message': message,
