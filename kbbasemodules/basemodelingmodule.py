@@ -81,6 +81,11 @@ class BaseModelingModule(BaseModule):
             self.set_ws(workspace)
         #from cobrakbase.core.kbasefba.fbamodel_from_cobra import CobraModelConverter
         fbamodel = mdlutl.model
+        print("Getting ready to set COBRA attributes!")
+        self.print_json_debug_file("attributes",mdlutl.attributes)
+        if hasattr(mdlutl.model, "attributes"):
+            print("Setting COBRA attributes!")
+            mdlutl.model.attributes = mdlutl.attributes
         if not isinstance(mdlutl.model,FBAModel):
             fbamodel = CobraModelConverter(mdlutl.model,mdlutl.model.genome, mdlutl.model.template).build()
         fbamodel.genome_ref = str(mdlutl.model.genome.info)
@@ -92,11 +97,11 @@ class BaseModelingModule(BaseModule):
             'id':self.ws_id,
             'objects': [{
                 'data': json,
-                'name': mdlutl.model.id,
+                'name': mdlutl.model.genome.info.id,
                 'type': "KBaseFBA.FBAModel",
                 'meta': {},
                 'provenance': self.provenance()
             }]
         }
         self.ws_client().save_objects(params)
-        self.obj_created.append({"ref":self.create_ref(mdlutl.model.id,self.ws_name),"description":""})
+        self.obj_created.append({"ref":self.create_ref(mdlutl.model.genome.info.id,self.ws_name),"description":""})
