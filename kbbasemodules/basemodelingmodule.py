@@ -7,6 +7,7 @@ import json
 import cobrakbase
 from kbbasemodules.basemodule import BaseModule
 from modelseedpy.core.mstemplate import MSTemplateBuilder
+from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from cobrakbase.core.kbasefba.fbamodel_from_cobra import CobraModelConverter
 from cobrakbase.core.kbasefba import FBAModel
@@ -37,6 +38,15 @@ class BaseModelingModule(BaseModule):
         media.id = media.info.id
         self.input_objects.append(media.info.reference)
         return media
+    
+    def get_model(self,id_or_ref,ws=None):
+        mdlutl = MSModelUtil(self.kbase_api.get_from_ws(id_or_ref,ws))
+        mdlutl.wsid = mdlutl.model.info[0]
+        #kbmodel = self.kbase_api.get_object(mdl_ref,None) #Should not have to do these three steps if the cobrakbase is working right
+        #mdlutl.model.genome = self.kbase_api.get_from_ws(kbmodel["genome_ref"],None)
+        #mdlutl.model.template = self.kbase_api.get_from_ws(kbmodel["template_ref"],None)
+        self.input_objects.append(mdlutl.model.info.reference)
+        return mdlutl
     
     #################Classifier functions#####################
     def get_classifier(self):
@@ -76,32 +86,32 @@ class BaseModelingModule(BaseModule):
         return template
 
     #################Save functions#####################
-    def save_model(self,mdlutl,workspace=None):
+    def save_model(self,mdlutl,workspace=None,suffix=None):
         if workspace:
             self.set_ws(workspace)
-        #from cobrakbase.core.kbasefba.fbamodel_from_cobra import CobraModelConverter
         fbamodel = mdlutl.model
-        print("Getting ready to set COBRA attributes!")
         self.print_json_debug_file("attributes",mdlutl.attributes)
-        if hasattr(mdlutl.model, "attributes"):
-            print("Setting COBRA attributes!")
-            mdlutl.model.attributes = mdlutl.attributes
         if not isinstance(mdlutl.model,FBAModel):
             fbamodel = CobraModelConverter(mdlutl.model,mdlutl.model.genome, mdlutl.model.template).build()
+        if hasattr(fbamodel, "attributes"):
+            print("Setting COBRA attributes!")
+            fbamodel.attributes = mdlutl.attributes
         fbamodel.genome_ref = str(mdlutl.model.genome.info)
         fbamodel.template_ref = str(mdlutl.model.template.info)
         json = fbamodel.get_data()
+        if not suffix:
+            suffix = ""
         
         mdlutl.create_kb_gapfilling_data(json,self.config["ATP_media_workspace"])
         params = {
             'id':self.ws_id,
             'objects': [{
                 'data': json,
-                'name': mdlutl.wsid,
+                'name': mdlutl.wsid+suffix,
                 'type': "KBaseFBA.FBAModel",
                 'meta': {},
                 'provenance': self.provenance()
             }]
         }
         self.ws_client().save_objects(params)
-        self.obj_created.append({"ref":self.create_ref(mdlutl.wsid,self.ws_name),"description":""})
+        self.obj_created.append({"ref":self.create_ref(mdlutl.wsid+suffix,self.ws_name),"description":""})
