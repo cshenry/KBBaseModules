@@ -97,11 +97,11 @@ class BaseModelingModule(BaseModule):
             'id':self.ws_id,
             'objects': [{
                 'data': json,
-                'name': mdlutl.model.genome.info.id,
+                'name': mdlutl.model.id,
                 'type': "KBaseFBA.FBAModel",
                 'meta': {},
                 'provenance': self.provenance()
             }]
         }
         self.ws_client().save_objects(params)
-        self.obj_created.append({"ref":self.create_ref(mdlutl.model.genome.info.id,self.ws_name),"description":""})
+        self.obj_created.append({"ref":self.create_ref(mdlutl.model.id,self.ws_name),"description":""})
