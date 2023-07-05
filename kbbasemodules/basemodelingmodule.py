@@ -41,7 +41,7 @@ class BaseModelingModule(BaseModule):
     
     def get_model(self,id_or_ref,ws=None):
         mdlutl = MSModelUtil(self.kbase_api.get_from_ws(id_or_ref,ws))
-        mdlutl.wsid = mdlutl.model.info[0]
+        mdlutl.wsid = mdlutl.model.info.id
         #kbmodel = self.kbase_api.get_object(mdl_ref,None) #Should not have to do these three steps if the cobrakbase is working right
         #mdlutl.model.genome = self.kbase_api.get_from_ws(kbmodel["genome_ref"],None)
         #mdlutl.model.template = self.kbase_api.get_from_ws(kbmodel["template_ref"],None)
