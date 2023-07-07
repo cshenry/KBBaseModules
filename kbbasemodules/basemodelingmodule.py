@@ -26,6 +26,13 @@ class BaseModelingModule(BaseModule):
         self.kbase_api = cobrakbase.KBaseAPI(token=token)
         #self.kbase_api = cobrakbase.KBaseCache(token=token,dev=True)
         self.kbase_api.ws_client = self.ws_client()
+        #Loading default templates
+        self.templates = {
+            "core" : self.get_template("core_template_sulfur3","NewKBaseModelTemplates"),
+            "gp" : None,
+            "gn" : None,
+            "custom": None
+        }        
     
     #################Genome functions#####################
     def get_msgenome(self,id_or_ref,ws=None):
