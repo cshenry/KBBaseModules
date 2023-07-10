@@ -93,32 +93,40 @@ class BaseModelingModule(BaseModule):
         return template
 
     #################Save functions#####################
-    def save_model(self,mdlutl,workspace=None,suffix=None):
-        if workspace:
-            self.set_ws(workspace)
-        fbamodel = mdlutl.model
-        self.print_json_debug_file("attributes",mdlutl.attributes)
-        if not isinstance(mdlutl.model,FBAModel):
-            fbamodel = CobraModelConverter(mdlutl.model,mdlutl.model.genome, mdlutl.model.template).build()
-        if hasattr(fbamodel, "attributes"):
-            print("Setting COBRA attributes!")
-            fbamodel.attributes = mdlutl.attributes
-        fbamodel.genome_ref = str(mdlutl.model.genome.info)
-        fbamodel.template_ref = str(mdlutl.model.template.info)
-        json = fbamodel.get_data()
+    def save_model(self,mdlutl,workspace=None,objid=None,suffix=None):
+        #Setting the ID based on input
         if not suffix:
             suffix = ""
+        if not objid:
+            objid = self.ws_id
+        if not objid:
+            logger.critical("Must provide an ID to save a model!")
+        objid = objid+suffix
         
+        #Setting the workspace
+        if workspace:
+            self.set_ws(workspace)
+        
+        #Saving final attributes and converting the model into KBase format
+        self.print_json_debug_file("attributes",mdlutl.attributes)
+        if not isinstance(mdlutl.model,FBAModel):
+            mdlutl.model = CobraModelConverter(mdlutl.model,mdlutl.model.genome, mdlutl.model.template).build()
+        mdlutl.save_attributes()
+        mdlutl.model.genome_ref = str(mdlutl.model.genome.info)
+        mdlutl.model.template_ref = str(mdlutl.model.template.info)
+        json = mdlutl.model.get_data()
+        
+        #Setting provenance and saving model using workspace API
         mdlutl.create_kb_gapfilling_data(json,self.config["ATP_media_workspace"])
         params = {
-            'id':self.ws_id,
+            'id':objid,
             'objects': [{
                 'data': json,
-                'name': mdlutl.wsid+suffix,
+                'name': objid,
                 'type': "KBaseFBA.FBAModel",
                 'meta': {},
                 'provenance': self.provenance()
             }]
         }
         self.ws_client().save_objects(params)
-        self.obj_created.append({"ref":self.create_ref(mdlutl.wsid+suffix,self.ws_name),"description":""})
+        self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
