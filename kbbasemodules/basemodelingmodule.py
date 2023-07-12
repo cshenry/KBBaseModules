@@ -98,7 +98,7 @@ class BaseModelingModule(BaseModule):
         if not suffix:
             suffix = ""
         if not objid:
-            objid = mdlutl.ws_id
+            objid = mdlutl.wsid
         if not objid:
             logger.critical("Must provide an ID to save a model!")
         objid = objid+suffix
