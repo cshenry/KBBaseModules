@@ -98,7 +98,7 @@ class BaseModelingModule(BaseModule):
         if not suffix:
             suffix = ""
         if not objid:
-            objid = self.ws_id
+            objid = mdlutl.ws_id
         if not objid:
             logger.critical("Must provide an ID to save a model!")
         objid = objid+suffix
@@ -108,7 +108,7 @@ class BaseModelingModule(BaseModule):
             self.set_ws(workspace)
         
         #Saving final attributes and converting the model into KBase format
-        self.print_json_debug_file("attributes",mdlutl.attributes)
+        self.print_json_debug_file(objid+"-attributes.json",mdlutl.attributes)
         if not isinstance(mdlutl.model,FBAModel):
             mdlutl.model = CobraModelConverter(mdlutl.model,mdlutl.model.genome, mdlutl.model.template).build()
         mdlutl.save_attributes()
