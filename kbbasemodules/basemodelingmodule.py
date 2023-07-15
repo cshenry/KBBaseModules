@@ -119,7 +119,7 @@ class BaseModelingModule(BaseModule):
         #Setting provenance and saving model using workspace API
         mdlutl.create_kb_gapfilling_data(json,self.config["ATP_media_workspace"])
         params = {
-            'id':objid,
+            'id':self.ws_id,
             'objects': [{
                 'data': json,
                 'name': objid,

@@ -193,6 +193,37 @@ class BaseModule:
             return None
         return res["data"][0]
     
+    def save_genome_or_metagenome(self,objid,workspace,obj_json):
+        self.set_ws(workspace)
+        save_output = self.gfu_client().save_one_genome({
+            "name" : objid,
+            "data" : obj_json,
+            "upgrade" : 1,
+            "provenance" : self.provenance(),
+            "hidden" : 0,
+            "workspace" : self.ws_name
+        });
+        self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
+        return save_output["info"]
+    
+    def save_ws_object(self,objid,workspace,obj_json,obj_type):
+        self.set_ws(workspace)
+        params = {
+            'id':self.ws_id,
+            'objects': [{
+                'data': obj_json,
+                'name': objid,
+                'type': obj_type,
+                'meta': {},
+                'provenance': self.provenance()
+            }]
+        }
+        self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
+        return self.ws_client().save_objects(params)
+    
+    def wsinfo_to_ref(self,info):
+        return str(info[6])+"/"+str(info[0])+"/"+str(info[4])
+    
     def create_ref(self,id_or_ref,ws=None):
         if isinstance(id_or_ref, int):
             id_or_ref=str(id_or_ref)
