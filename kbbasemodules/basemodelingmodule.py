@@ -107,21 +107,19 @@ class BaseModelingModule(BaseModule):
         if workspace:
             self.set_ws(workspace)
         
-        #Saving final attributes and converting the model into KBase format
+        #Saving final attributes and converting the model into KBase format if needed
         self.print_json_debug_file(objid+"-attributes.json",mdlutl.attributes)
-        if not isinstance(mdlutl.model,FBAModel):
-            mdlutl.model = CobraModelConverter(mdlutl.model,mdlutl.model.genome, mdlutl.model.template).build()
+        #if not isinstance(mdlutl.model,FBAModel):
+            #mdlutl.model = CobraModelConverter(mdlutl.model,mdlutl.model.genome, mdlutl.model.template).build()
         mdlutl.save_attributes()
-        mdlutl.model.genome_ref = str(mdlutl.model.genome.info)
-        mdlutl.model.template_ref = str(mdlutl.model.template.info)
-        json = mdlutl.model.get_data()
+        data = mdlutl.model.get_data()
         
         #Setting provenance and saving model using workspace API
-        mdlutl.create_kb_gapfilling_data(json,self.config["ATP_media_workspace"])
+        mdlutl.create_kb_gapfilling_data(data,self.config["ATP_media_workspace"])
         params = {
             'id':self.ws_id,
             'objects': [{
-                'data': json,
+                'data': data,
                 'name': objid,
                 'type': "KBaseFBA.FBAModel",
                 'meta': {},
