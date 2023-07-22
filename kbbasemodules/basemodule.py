@@ -96,7 +96,17 @@ class BaseModule:
             from installed_clients.GenomeFileUtilClient import GenomeFileUtil
             self.clients["GenomeFileUtil"] = GenomeFileUtil(self.callback_url,token=self.token)
         return self.clients["GenomeFileUtil"]
-
+    
+    def anno_client(self,native_python_api=False):
+        if "cb_annotation_ontology_api" not in self.clients:
+            if native_python_api:
+                from cb_annotation_ontology_api.annotation_ontology_api import AnnotationOntologyModule
+                self.clients["cb_annotation_ontology_api"] = AnnotationOntologyModule("cb_annotation_ontology_api",{"data" :"/data/"},module_dir=self.module_dir+"/../cb_annotation_ontology_api",working_dir=self.working_dir,token=self.token,clients={"Workspace":self.ws_client()})
+            else:
+                from installed_clients.cb_annotation_ontology_apiClient import cb_annotation_ontology_api
+                self.clients["cb_annotation_ontology_api"] = cb_annotation_ontology_api(self.callback_url,token=self.token)
+        return self.clients["cb_annotation_ontology_api"]
+    
     #########GENERAL UTILITY FUNCTIONS#######################
     def validate_args(self,params,required,defaults):
         #print("One:"+json.dumps(params,indent=4)+"\n\n")
