@@ -30,8 +30,8 @@ class BaseModelingModule(BaseModule):
         #Loading default templates
         self.templates = {
             "core" : self.get_template("Core-V5.1","NewKBaseModelTemplates"),
-            "gp" : None,
-            "gn" : None,
+            "gp" : self.get_template("GramPosModelTemplateV5","NewKBaseModelTemplates"),
+            "gn" : self.get_template("GramNegModelTemplateV5","NewKBaseModelTemplates"),
             "custom": None
         }        
     
@@ -90,7 +90,7 @@ class BaseModelingModule(BaseModule):
                     gs_template.reactions.remove(rxn)
         return gs_template
     
-    def get_template(self,template_id,ws):
+    def get_template(self,template_id,ws=None):
         template = self.kbase_api.get_from_ws(template_id,ws)
         #template = self.kbase_api.get_object(template_id,ws)
         #info = self.kbase_api.get_object_info(template_id,ws)
