@@ -8,6 +8,7 @@ import cobrakbase
 from kbbasemodules.basemodule import BaseModule
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.msgrowthphenotypes import MSGrowthPhenotypes
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from cobrakbase.core.kbasefba.fbamodel_from_cobra import CobraModelConverter
 from cobrakbase.core.kbasefba import FBAModel
@@ -28,7 +29,7 @@ class BaseModelingModule(BaseModule):
         self.kbase_api.ws_client = self.ws_client()
         #Loading default templates
         self.templates = {
-            "core" : self.get_template("core_template_sulfur3","NewKBaseModelTemplates"),
+            "core" : self.get_template("Core-V5.1","NewKBaseModelTemplates"),
             "gp" : None,
             "gn" : None,
             "custom": None
@@ -45,6 +46,11 @@ class BaseModelingModule(BaseModule):
         media.id = media.info.id
         self.input_objects.append(media.info.reference)
         return media
+    
+    def get_phenotypeset(self,id_or_ref,ws=None,base_media=None, base_uptake=0, base_excretion=1000,global_atom_limits={}):
+        kbphenoset = self.kbase_api.get_object(id_or_ref,ws)
+        phenoset = MSGrowthPhenotypes.from_kbase_object(kbphenoset,self.kbase_api,base_media,base_uptake,base_excretion,global_atom_limits)
+        return phenoset
     
     def get_model(self,id_or_ref,ws=None):
         mdlutl = MSModelUtil(self.kbase_api.get_from_ws(id_or_ref,ws))
