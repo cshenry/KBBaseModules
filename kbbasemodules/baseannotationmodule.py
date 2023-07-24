@@ -17,12 +17,6 @@ class BaseAnnotationModule(BaseModule):
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
     
-    def anno_client(self):
-        if "cb_annotation_ontology_api" not in self.clients:
-            from installed_clients.cb_annotation_ontology_apiClient import cb_annotation_ontology_api
-            self.clients["cb_annotation_ontology_api"] = cb_annotation_ontology_api(self.callback_url,token=self.token)
-        return self.clients["cb_annotation_ontology_api"]
-    
     def object_to_proteins(self,ref):
         output = self.get_object(ref,self.ws_id)
         self.object_info_hash[ref] = output["info"]
