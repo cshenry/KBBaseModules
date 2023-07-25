@@ -245,11 +245,12 @@ class BaseModule:
     
     #########REPORT RELATED FUNCTIONS#######################
     def save_report_to_kbase(self,height=700,message=""):
-        files = []
         rootDir = self.working_dir+"/html/"
+        files = [{'path': rootDir,'name': "index.html",'description': 'HTML report'}]
         for dirName, subdirList, fileList in os.walk(rootDir):
             for fname in fileList:
-                files.append({'path': dirName,'name': fname,'description': 'HTML report for PDB upload'})
+                if fname != "index.html":
+                    files.append({'path': dirName,'name': fname,'description': 'Files related to HTML report'})
         report_name = self.method+"-"+str(uuid.uuid4())
         output = self.report_client().create_extended_report({'message': message,
                          'html_links': files,
