@@ -32,6 +32,7 @@ class BaseModelingModule(BaseModule):
             "core" : self.get_template("Core-V5.1","NewKBaseModelTemplates"),
             "gp" : self.get_template("GramPosModelTemplateV5","NewKBaseModelTemplates"),
             "gn" : self.get_template("GramNegModelTemplateV5","NewKBaseModelTemplates"),
+            "ar" : self.get_template("ArchaeaTemplateV5","NewKBaseModelTemplates"),
             "custom": None
         }        
     
