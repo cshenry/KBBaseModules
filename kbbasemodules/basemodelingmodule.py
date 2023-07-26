@@ -133,5 +133,6 @@ class BaseModelingModule(BaseModule):
                 'provenance': self.provenance()
             }]
         }
+        mdlutl.wsid = objid
         self.ws_client().save_objects(params)
         self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
