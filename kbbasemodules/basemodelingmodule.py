@@ -22,6 +22,7 @@ excluded_cpd = ["cpd22290","cpd11850"]
 class BaseModelingModule(BaseModule):
     def __init__(self,name,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
         BaseModule.__init__(self,name,config,module_dir,working_dir,token,clients,callback)
+        self.version = "0.1.1.mm"
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
         self.kbase_api = cobrakbase.KBaseAPI(token=token)
@@ -34,7 +35,15 @@ class BaseModelingModule(BaseModule):
             "gn" : self.get_template("GramNegModelTemplateV5","NewKBaseModelTemplates"),
             "ar" : self.get_template("ArchaeaTemplateV5","NewKBaseModelTemplates"),
             "custom": None
-        }        
+        }
+        #Setting ATP media
+        if "ATP_media_workspace" not in self.config or not self.config["ATP_media_workspace"]:
+            if self.kb_version() == "prod":
+                self.config["ATP_media_workspace"] = "94026"
+            elif self.kb_version() == "dev":
+                self.config["ATP_media_workspace"] = "68393"
+            else:
+                logger.critical("KBase version not set up for modeling!")
     
     #################Genome functions#####################
     def get_msgenome(self,id_or_ref,ws=None):
@@ -109,30 +118,30 @@ class BaseModelingModule(BaseModule):
         if not objid:
             logger.critical("Must provide an ID to save a model!")
         objid = objid+suffix
-        
-        #Setting the workspace
-        if workspace:
-            self.set_ws(workspace)
-        
-        #Saving final attributes and converting the model into KBase format if needed
-        self.print_json_debug_file(objid+"-attributes.json",mdlutl.attributes)
-        #if not isinstance(mdlutl.model,FBAModel):
-            #mdlutl.model = CobraModelConverter(mdlutl.model,mdlutl.model.genome, mdlutl.model.template).build()
+        mdlutl.wsid = objid
+        #Saving attributes and getting model data
+        if not isinstance(mdlutl.model,FBAModel):
+            mdlutl.model = CobraModelConverter(mdlutl.model).build()
         mdlutl.save_attributes()
         data = mdlutl.model.get_data()
-        
-        #Setting provenance and saving model using workspace API
-        mdlutl.create_kb_gapfilling_data(data,self.config["ATP_media_workspace"])
-        params = {
-            'id':self.ws_id,
-            'objects': [{
-                'data': data,
-                'name': objid,
-                'type': "KBaseFBA.FBAModel",
-                'meta': {},
-                'provenance': self.provenance()
-            }]
-        }
-        mdlutl.wsid = objid
-        self.ws_client().save_objects(params)
-        self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
+        #If the workspace is None, then saving data to file
+        if not workspace:
+            self.print_json_debug_file(mdlutl.wsid+".json",data)
+        else:
+            #Setting the workspace
+            if workspace:
+                self.set_ws(workspace)
+            #Setting provenance and saving model using workspace API
+            mdlutl.create_kb_gapfilling_data(data,self.config["ATP_media_workspace"])
+            params = {
+                'id':self.ws_id,
+                'objects': [{
+                    'data': data,
+                    'name': objid,
+                    'type': "KBaseFBA.FBAModel",
+                    'meta': {},
+                    'provenance': self.provenance()
+                }]
+            }
+            self.ws_client().save_objects(params)
+            self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})

@@ -22,6 +22,7 @@ logger.setLevel(
 class BaseModule:
     def __init__(self,name,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
         #Initializing flexible container for client libraries which will be lazy loaded as needed
+        self.version = "0.1.1.bm"
         self.clients = {}
         self.callback_url = callback
         for item in clients:
@@ -30,7 +31,6 @@ class BaseModule:
         self.config = config
         self.validate_args(self.config,[],{
             "max_retry":3,
-            "version":0,
             "workspace-url":"https://kbase.us/services/ws",
         })
         self.token = token
@@ -108,6 +108,19 @@ class BaseModule:
         return self.clients["cb_annotation_ontology_api"]
     
     #########GENERAL UTILITY FUNCTIONS#######################
+    def kb_version(self):
+        wsclient = self.ws_client()
+        if "appdev.kbase.us" in wsclient._client.url:
+            return "dev"
+        elif "/kbase.us" in wsclient._client.url:
+            return "prod"
+        elif "ci.kbase.us" in wsclient._client.url:
+            return "ci"
+        elif "next.kbase.us" in wsclient._client.url:
+            return "next"
+        else:
+            return "unknown"
+    
     def validate_args(self,params,required,defaults):
         #print("One:"+json.dumps(params,indent=4)+"\n\n")
         for item in required:
@@ -136,7 +149,7 @@ class BaseModule:
             'script_command_line': "",
             'method_params': [self.params],
             'service': self.name,
-            'service_ver': self.config["version"],
+            'service_ver': self.version,
             # 'time': '2015-12-15T22:58:55+0000'
         }]
     

@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class BaseAnnotationModule(BaseModule):
     def __init__(self,name,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
         BaseModule.__init__(self,name,config,module_dir,working_dir,token,clients,callback)
+        self.version = "0.1.1.am"
         self.object_info_hash = {}
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
@@ -80,7 +81,7 @@ class BaseAnnotationModule(BaseModule):
             anno_api_input["events"].append({
                 "ontology_id":ontology,
                 "method":self.name+"."+self.method,
-                "method_version":self.config["version"],
+                "method_version":self.version,
                 "timestamp":self.timestamp,
                 "ontology_terms":ontology_inputs[ontology]
             })
