@@ -149,8 +149,7 @@ class BaseModule:
             'script_command_line': "",
             'method_params': [self.params],
             'service': self.name,
-            'service_ver': self.version,
-            # 'time': '2015-12-15T22:58:55+0000'
+            'service_ver': self.version
         }]
     
     def set_ws(self,workspace):
