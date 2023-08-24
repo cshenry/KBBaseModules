@@ -30,12 +30,18 @@ class BaseModelingModule(BaseModule):
         self.kbase_api.ws_client = self.ws_client()
         #Loading default templates
         self.templates = {
-            "core" : self.get_template("Core-V5.1","NewKBaseModelTemplates"),
-            "gp" : self.get_template("GramPosModelTemplateV5","NewKBaseModelTemplates"),
-            "gn" : self.get_template("GramNegModelTemplateV5","NewKBaseModelTemplates"),
-            "ar" : self.get_template("ArchaeaTemplateV5","NewKBaseModelTemplates"),
+            "core" : "NewKBaseModelTemplates/Core-V5.1",
+            "gp" : "NewKBaseModelTemplates/GramPosModelTemplateV5",
+            "gn" : "NewKBaseModelTemplates/GramNegModelTemplateV5",
+            "ar" : "NewKBaseModelTemplates/ArchaeaTemplateV5",
+            "grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV5",
+            "gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV5",
+            "archaea" : "NewKBaseModelTemplates/ArchaeaTemplateV5",
+            "old_grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV3",
+            "old_gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV3",
             "custom": None
         }
+        
         #Setting ATP media
         if "ATP_media_workspace" not in self.config or not self.config["ATP_media_workspace"]:
             if self.kb_version() == "prod":
