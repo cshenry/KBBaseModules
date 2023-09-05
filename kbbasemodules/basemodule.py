@@ -97,6 +97,12 @@ class BaseModule:
             self.clients["GenomeFileUtil"] = GenomeFileUtil(self.callback_url,token=self.token)
         return self.clients["GenomeFileUtil"]
     
+    def afu_client(self):
+        if "AssemblyUtil" not in self.clients:
+            from installed_clients.AssemblyUtilClient import AssemblyUtil
+            self.clients["AssemblyUtil"] = AssemblyUtil(self.callback_url,token=self.token)
+        return self.clients["AssemblyUtil"]
+    
     def anno_client(self,native_python_api=False):
         if "cb_annotation_ontology_api" not in self.clients:
             if native_python_api:
