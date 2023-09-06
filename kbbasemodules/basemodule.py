@@ -75,31 +75,31 @@ class BaseModule:
     #########CLIENT RETRIEVAL AND INITIALIZATION FUNCTIONS#######################
     def ws_client(self):
         if "Workspace" not in self.clients:
-            from installed_clients.WorkspaceClient import Workspace
+            from kbbasemodules import Workspace
             self.clients["Workspace"] = Workspace(self.config["workspace-url"], token=self.token)
         return self.clients["Workspace"]
     
     def report_client(self):
         if "KBaseReport" not in self.clients:
-            from installed_clients.KBaseReportClient import KBaseReport
+            from kbbasemodules import KBaseReport
             self.clients["KBaseReport"] = KBaseReport(self.callback_url,token=self.token)
         return self.clients["KBaseReport"]
     
     def dfu_client(self):
         if "DataFileUtil" not in self.clients:
-            from installed_clients.DataFileUtilClient import DataFileUtil
+            from kbbasemodules import DataFileUtil
             self.clients["DataFileUtil"] = DataFileUtil(self.callback_url,token=self.token)
         return self.clients["DataFileUtil"]
     
     def gfu_client(self):
         if "GenomeFileUtil" not in self.clients:
-            from installed_clients.GenomeFileUtilClient import GenomeFileUtil
+            from kbbasemodules import GenomeFileUtil
             self.clients["GenomeFileUtil"] = GenomeFileUtil(self.callback_url,token=self.token)
         return self.clients["GenomeFileUtil"]
     
     def afu_client(self):
         if "AssemblyUtil" not in self.clients:
-            from installed_clients.AssemblyUtilClient import AssemblyUtil
+            from kbbasemodules import AssemblyUtil
             self.clients["AssemblyUtil"] = AssemblyUtil(self.callback_url,token=self.token)
         return self.clients["AssemblyUtil"]
     
@@ -109,7 +109,7 @@ class BaseModule:
                 from cb_annotation_ontology_api.annotation_ontology_api import AnnotationOntologyModule
                 self.clients["cb_annotation_ontology_api"] = AnnotationOntologyModule("cb_annotation_ontology_api",{"data" :"/data/"},module_dir=self.module_dir+"/../cb_annotation_ontology_api",working_dir=self.working_dir,token=self.token,clients={"Workspace":self.ws_client()})
             else:
-                from installed_clients.cb_annotation_ontology_apiClient import cb_annotation_ontology_api
+                from kbbasemodules import cb_annotation_ontology_api
                 self.clients["cb_annotation_ontology_api"] = cb_annotation_ontology_api(self.callback_url,token=self.token)
         return self.clients["cb_annotation_ontology_api"]
     
