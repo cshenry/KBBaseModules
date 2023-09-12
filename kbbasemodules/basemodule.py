@@ -44,7 +44,7 @@ class BaseModule:
         self.reset_attributes()
     
     #########METHOD CALL INITIALIZATION FUNCTIONS#######################
-    def initialize_call(self,method,params,print_params=False):
+    def initialize_call(self,method,params,print_params=False,no_print=[]):
         if not self.initialized:
             self.obj_created = []
             self.input_objects = []
@@ -56,7 +56,14 @@ class BaseModule:
             elif "output_workspace" in params:
                 self.set_ws(params["output_workspace"])
             if print_params:
+                saved_data = {}
+                for item in no_print:
+                    if item in params:
+                        saved_data[item] = params[item]
+                        del params[item]
                 logger.info(method+":"+json.dumps(params,indent=4))
+                for item in saved_data:
+                    params[item] = saved_data[item]
                 
     def reset_attributes(self):
         #Initializing stores tracking objects created and input objects
