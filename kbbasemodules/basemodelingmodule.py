@@ -53,6 +53,8 @@ class BaseModelingModule(BaseModule):
     
     #################Utility functions#####################
     def process_media_list(self,media_list,default_media,workspace):
+        if not media_list:
+            media_list = []
         #Retrieving media objects from references
         media_objects = []
         first = True
