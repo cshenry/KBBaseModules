@@ -28,13 +28,6 @@ class BaseAnnotationModule(BaseModule):
                 sequence_list.append([ftr["id"],ftr["protein_translation"]])
         return sequence_list
     
-    def process_object_list(self,input_references):
-        output_references = []
-        for ref in input_references:
-            #TODO: add support for genomesets
-            output_references.append(ref)
-        return output_references
-    
     def add_annotations_to_object(self,reference,suffix,annotations):
         """Loads specified gene annotation into KBase genome object
         

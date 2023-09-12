@@ -114,6 +114,21 @@ class BaseModule:
         return self.clients["cb_annotation_ontology_api"]
     
     #########GENERAL UTILITY FUNCTIONS#######################
+    def process_genome_list(self,input_references,workspace=None):
+        ws_identities = []
+        for ref in input_references:
+            ws_identities.append(self.process_ws_ids(ref,workspace))
+        output = self.ws_client().get_object_info(ws_identities,1)
+        output_references = []
+        for info in output:
+            if info[2] == "KBaseSearch.GenomeSet":
+                genomeset = self.get_object(self.wsinfo_to_ref(info))
+                for label in genomeset["elements"]:
+                    output_references.append(genomeset["elements"][label]["ref"])
+            else:
+                output_references.append(self.wsinfo_to_ref(info))
+        return output_references
+    
     def kb_version(self):
         wsclient = self.ws_client()
         if "appdev.kbase.us" in wsclient._client.url:

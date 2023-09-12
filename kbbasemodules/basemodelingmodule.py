@@ -51,6 +51,36 @@ class BaseModelingModule(BaseModule):
             else:
                 logger.critical("KBase version not set up for modeling!")
     
+    #################Utility functions#####################
+    def process_media_list(self,media_list,default_media,workspace):
+        #Retrieving media objects from references
+        media_objects = []
+        first = True
+        #Cleaning out empty or invalid media references
+        original_list = media_list
+        media_list = []
+        for media_ref in original_list:
+            if len(media_ref) == 0:
+                if first:
+                    media_list.append(default_media)
+                    first = False
+                else:
+                    print("Filtering out empty media reference")
+            elif len(media_ref.split("/")) == 1:
+                media_list.append(str(workspace)+"/"+media_ref)
+            elif len(media_ref.split("/")) <= 3:
+                media_list.append(media_ref)
+            else:
+                print(media_ref+" looks like an invalid workspace reference")
+        #Making sure default gapfilling media is complete media
+        if not media_list or len(media_list) == 0:
+            media_list = [default_media]            
+        #Retrieving media objects        
+        for media_ref in media_list:  
+            media = self.get_media(media_ref,None)
+            media_objects.append(media)
+        return media_objects
+    
     #################Genome functions#####################
     def get_msgenome(self,id_or_ref,ws=None):
         genome = self.kbase_api.get_from_ws(id_or_ref,ws)
