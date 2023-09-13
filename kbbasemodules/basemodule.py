@@ -128,7 +128,7 @@ class BaseModule:
         output = self.ws_client().get_object_info(ws_identities,1)
         output_references = []
         for info in output:
-            if info[2] == "KBaseSearch.GenomeSet":
+            if info[2].startswith("KBaseSearch.GenomeSet"):
                 genomeset = self.get_object(self.wsinfo_to_ref(info))
                 for label in genomeset["elements"]:
                     output_references.append(genomeset["elements"][label]["ref"])
