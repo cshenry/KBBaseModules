@@ -129,8 +129,7 @@ class BaseModule:
         output_references = []
         for info in output:
             if info[2].startswith("KBaseSearch.GenomeSet"):
-                genomeset = self.get_object(self.wsinfo_to_ref(info))
-                self.print_json_debug_file("GenomeSet.json",genomeset)
+                genomeset = self.get_object(self.wsinfo_to_ref(info))["data"]
                 for label in genomeset["elements"]:
                     output_references.append(genomeset["elements"][label]["ref"])
             else:
