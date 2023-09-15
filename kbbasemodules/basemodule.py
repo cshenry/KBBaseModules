@@ -114,7 +114,7 @@ class BaseModule:
         if "cb_annotation_ontology_api" not in self.clients:
             if native_python_api:
                 from cb_annotation_ontology_api.annotation_ontology_api import AnnotationOntologyModule
-                self.clients["cb_annotation_ontology_api"] = AnnotationOntologyModule("cb_annotation_ontology_api",{"data" :"/data/"},module_dir=self.module_dir+"/../cb_annotation_ontology_api",working_dir=self.working_dir,token=self.token,clients={"Workspace":self.ws_client()})
+                self.clients["cb_annotation_ontology_api"] = AnnotationOntologyModule("cb_annotation_ontology_api",{"data" :"/data/"},module_dir=self.module_dir+"/../cb_annotation_ontology_api",working_dir=self.working_dir,token=self.token,clients=self.clients,callback=self.callback_url)
             else:
                 from kbbasemodules import cb_annotation_ontology_api
                 self.clients["cb_annotation_ontology_api"] = cb_annotation_ontology_api(self.callback_url,token=self.token)
