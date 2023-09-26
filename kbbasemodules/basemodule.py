@@ -82,31 +82,46 @@ class BaseModule:
     #########CLIENT RETRIEVAL AND INITIALIZATION FUNCTIONS#######################
     def ws_client(self):
         if "Workspace" not in self.clients:
-            from kbbasemodules import Workspace
+            if "devenv" in self.config and self.config["devenv"] == "1":
+                from kbbasemodules import Workspace
+            else:
+                from installed_clients.WorkspaceClient import Workspace
             self.clients["Workspace"] = Workspace(self.config["workspace-url"], token=self.token)
         return self.clients["Workspace"]
     
     def report_client(self):
         if "KBaseReport" not in self.clients:
-            from kbbasemodules import KBaseReport
+            if "devenv" in self.config and self.config["devenv"] == "1":
+                from kbbasemodules import KBaseReport
+            else:
+                from installed_clients.KBaseReportClient import KBaseReport
             self.clients["KBaseReport"] = KBaseReport(self.callback_url,token=self.token)
         return self.clients["KBaseReport"]
     
     def dfu_client(self):
         if "DataFileUtil" not in self.clients:
-            from kbbasemodules import DataFileUtil
+            if "devenv" in self.config and self.config["devenv"] == "1":
+                from kbbasemodules import DataFileUtil
+            else:
+                from installed_clients.DataFileUtilClient import DataFileUtil
             self.clients["DataFileUtil"] = DataFileUtil(self.callback_url,token=self.token)
         return self.clients["DataFileUtil"]
     
     def gfu_client(self):
         if "GenomeFileUtil" not in self.clients:
-            from kbbasemodules import GenomeFileUtil
+            if "devenv" in self.config and self.config["devenv"] == "1":
+                from kbbasemodules import GenomeFileUtil
+            else:
+                from installed_clients.GenomeFileUtilClient import GenomeFileUtil
             self.clients["GenomeFileUtil"] = GenomeFileUtil(self.callback_url,token=self.token)
         return self.clients["GenomeFileUtil"]
     
     def afu_client(self):
         if "AssemblyUtil" not in self.clients:
-            from kbbasemodules import AssemblyUtil
+            if "devenv" in self.config and self.config["devenv"] == "1":
+                from kbbasemodules import AssemblyUtil
+            else:
+                from installed_clients.AssemblyUtilClient import AssemblyUtil
             self.clients["AssemblyUtil"] = AssemblyUtil(self.callback_url,token=self.token)
         return self.clients["AssemblyUtil"]
     
@@ -116,7 +131,10 @@ class BaseModule:
                 from cb_annotation_ontology_api.annotation_ontology_api import AnnotationOntologyModule
                 self.clients["cb_annotation_ontology_api"] = AnnotationOntologyModule("cb_annotation_ontology_api",{"data" :"/data/"},module_dir=self.module_dir+"/../cb_annotation_ontology_api",working_dir=self.working_dir,token=self.token,clients=self.clients,callback=self.callback_url)
             else:
-                from kbbasemodules import cb_annotation_ontology_api
+                if "devenv" in self.config and self.config["devenv"] == "1":
+                    from kbbasemodules import cb_annotation_ontology_api
+                else:
+                    from installed_clients.cb_annotation_ontology_apiClient import cb_annotation_ontology_api
                 self.clients["cb_annotation_ontology_api"] = cb_annotation_ontology_api(self.callback_url,token=self.token)
         return self.clients["cb_annotation_ontology_api"]
     
@@ -284,7 +302,7 @@ class BaseModule:
         return ws+"/"+id_or_ref
     
     #########REPORT RELATED FUNCTIONS#######################
-    def save_report_to_kbase(self,height=700,message=""):
+    def save_report_to_kbase(self,height=700,message="",warnings=[],file_links=[],summary_height=None):
         rootDir = self.working_dir+"/html/"
         files = [{'path': rootDir,'name': "index.html",'description': 'HTML report'}]
         for dirName, subdirList, fileList in os.walk(rootDir):
@@ -292,13 +310,18 @@ class BaseModule:
                 if fname != "index.html":
                     files.append({'path': dirName,'name': fname,'description': 'Files related to HTML report'})
         report_name = self.method+"-"+str(uuid.uuid4())
-        output = self.report_client().create_extended_report({'message': message,
-                         'html_links': files,
-                         'direct_html_link_index': 0,
-                         'html_window_height': height,
-                         'objects_created': self.obj_created,
-                         'workspace_name': self.ws_name,
-                         'report_object_name': report_name})
+        output = self.report_client().create_extended_report({
+            'message': message,
+            'warnings': warnings,            
+            'html_links': files,
+            'file_links': file_links,
+            'direct_html_link_index': 0,
+            'html_window_height': height,
+            'objects_created': self.obj_created,
+            'workspace_name': self.ws_name,
+            'report_object_name': report_name,
+            'summary_window_height': summary_height
+        })
         return {"report_name":report_name,"report_ref":output["ref"],'workspace_name':self.ws_name}
     
     def build_dataframe_report(self,table,column_list):        
