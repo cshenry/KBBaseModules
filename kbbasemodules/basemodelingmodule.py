@@ -86,6 +86,7 @@ class BaseModelingModule(BaseModule):
     #################Genome functions#####################
     def get_msgenome(self,id_or_ref,ws=None):
         genome = self.kbase_api.get_from_ws(id_or_ref,ws)
+        genome.id = genome.info.id
         self.input_objects.append(genome.info.reference)
         return genome
     
