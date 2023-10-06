@@ -62,7 +62,7 @@ class BaseModelingModule(BaseModule):
         original_list = media_list
         media_list = []
         for media_ref in original_list:
-            if len(media_ref) == 0:
+            if not media_ref or len(media_ref) == 0:
                 if first:
                     media_list.append(default_media)
                     first = False
