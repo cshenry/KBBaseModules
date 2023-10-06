@@ -5,6 +5,8 @@ import os
 import sys
 import json
 import pandas as pd
+from Bio.Seq import Seq
+from Bio.Alphabet import IUPAC, _verify_alphabet
 from kbbasemodules.basemodule import BaseModule
 from os.path import exists
 
@@ -23,9 +25,11 @@ class BaseAnnotationModule(BaseModule):
         self.object_info_hash[ref] = output["info"]
         sequence_list = []
         #TODO: add support for other object types
-        for ftr in output["data"]["features"]:
-            if "protein_translation" in ftr:
-                sequence_list.append([ftr["id"],ftr["protein_translation"]])
+        if "features" in output["data"]:
+            for ftr in output["data"]["features"]:
+                if "protein_translation" in ftr:
+                    if len(ftr["protein_translation"]) > 0 and _verify_alphabet(ftr["protein_translation"]):
+                        sequence_list.append([ftr["id"],ftr["protein_translation"]])
         return sequence_list
     
     def add_annotations_to_object(self,reference,suffix,annotations):
