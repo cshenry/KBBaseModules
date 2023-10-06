@@ -28,7 +28,7 @@ class BaseAnnotationModule(BaseModule):
         if "features" in output["data"]:
             for ftr in output["data"]["features"]:
                 if "protein_translation" in ftr:
-                    if len(ftr["protein_translation"]) > 0 and _verify_alphabet(ftr["protein_translation"]):
+                    if len(ftr["protein_translation"]) > 0 and _verify_alphabet(Seq(ftr["protein_translation"], IUPAC.protein)):
                         sequence_list.append([ftr["id"],ftr["protein_translation"]])
         return sequence_list
     
