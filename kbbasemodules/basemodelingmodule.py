@@ -101,12 +101,11 @@ class BaseModelingModule(BaseModule):
         phenoset = MSGrowthPhenotypes.from_kbase_object(kbphenoset,self.kbase_api,base_media,base_uptake,base_excretion,global_atom_limits)
         return phenoset
     
-    def get_model(self,id_or_ref,ws=None):
+    def get_model(self,id_or_ref,ws=None,is_json_file=False):
+        if is_json_file:
+            return MSModelUtil.build_from_kbase_json_file(id_or_ref)
         mdlutl = MSModelUtil(self.kbase_api.get_from_ws(id_or_ref,ws))
         mdlutl.wsid = mdlutl.model.info.id
-        #kbmodel = self.kbase_api.get_object(mdl_ref,None) #Should not have to do these three steps if the cobrakbase is working right
-        #mdlutl.model.genome = self.kbase_api.get_from_ws(kbmodel["genome_ref"],None)
-        #mdlutl.model.template = self.kbase_api.get_from_ws(kbmodel["template_ref"],None)
         self.input_objects.append(mdlutl.model.info.reference)
         return mdlutl
     
