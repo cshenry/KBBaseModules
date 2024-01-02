@@ -168,7 +168,6 @@ class BaseModule:
             return "unknown"
     
     def validate_args(self,params,required,defaults):
-        #print("One:"+json.dumps(params,indent=4)+"\n\n")
         for item in required:
             if item not in params:
                 raise ValueError('Required argument '+item+' is missing!')
