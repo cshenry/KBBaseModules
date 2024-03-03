@@ -44,12 +44,15 @@ class BaseModule:
         self.reset_attributes()
     
     #########METHOD CALL INITIALIZATION FUNCTIONS#######################
-    def initialize_call(self,method,params,print_params=False,no_print=[]):
+    def initialize_call(self,method,params,print_params=False,no_print=[],no_prov_params=[]):
         if not self.initialized:
             self.obj_created = []
             self.input_objects = []
             self.method = method
             self.params = copy.deepcopy(params)
+            for item in no_prov_params:
+                if item in self.params:
+                    del self.params[item]
             self.initialized = True
             if "workspace" in params:
                 self.set_ws(params["workspace"])
