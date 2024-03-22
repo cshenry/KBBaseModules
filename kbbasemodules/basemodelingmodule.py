@@ -103,6 +103,7 @@ class BaseModelingModule(BaseModule):
         annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
             "input_ref" : gen_ref
         }),gen_ref,self.module_dir+"/data/")
+        print(annoont.ontologies)
         if "SSO" not in annoont.ontologies or len(annoont.ontologies["SSO"]) == 0:
             logger.warning("Genome has not been annotated with RAST! Reannotating genome with RAST!")
             gen_ref = self.annotate_genome_with_rast(gen_ref,output_ws=None)
