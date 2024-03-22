@@ -8,6 +8,8 @@ import cobrakbase
 from kbbasemodules.basemodule import BaseModule
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core.msmodelutl import MSModelUtil
+from modelseedpy.core.msgenome import MSGenome
+from modelseedpy.core.annotationontology import AnnotationOntology
 from modelseedpy.core.msgrowthphenotypes import MSGrowthPhenotypes
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from cobrakbase.core.kbasefba.fbamodel_from_cobra import CobraModelConverter
@@ -84,10 +86,43 @@ class BaseModelingModule(BaseModule):
         return media_objects
     
     #################Genome functions#####################
-    def get_msgenome(self,id_or_ref,ws=None):
-        genome = self.kbase_api.get_from_ws(id_or_ref,ws)
-        genome.id = genome.info.id
-        self.input_objects.append(genome.info.reference)
+    def annotate_genome_with_rast(self,genome_id,ws=None,output_ws=None):
+        if not output_ws:
+            output_ws = ws
+        rast_client = self.rast_client()
+        output = rast_client.annotate_genome({
+            "workspace": output_ws,
+            "input_genome":genome_id,
+            "output_genome":genome_id+".RAST"
+        })
+        return output["workspace"]+"/"+output["id"]
+    
+    def get_msgenome_from_ontology(self,id_or_ref,ws=None,native_python_api=False):
+        annoapi = self.anno_client(native_python_api=native_python_api)
+        gen_ref = self.create_ref(id_or_ref,ws)
+        annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
+            "input_ref" : gen_ref
+        }),gen_ref,self.module_dir+"/data/")
+        if "SSO" not in annoont.ontologies or len(annoont.ontologies["SSO"]) == 0:
+            logger.warning("Genome has not been annotated with RAST! Reannotating genome with RAST!")
+            gen_ref = self.annotate_genome_with_rast(gen_ref)
+            annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
+                "input_ref" : gen_ref
+            }),gen_ref,self.module_dir+"/data/")
+        return annoont.get_msgenome()
+
+    def get_msgenome(self,id_or_ref,ws=None,from_ontology=False):
+        if from_ontology:
+            annoapi = self.anno_client(native_python_api=True)
+            annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
+                "input_ref" : gen_ref
+            }),gen_ref,self.module_dir+"/data/")
+            gene_term_hash = annoont.get_gene_term_hash(None,["SSO"],True,False)
+
+        else:
+            genome = self.kbase_api.get_from_ws(id_or_ref,ws)
+            genome.id = genome.info.id
+            self.input_objects.append(genome.info.reference)
         return genome
     
     def get_media(self,id_or_ref,ws=None):

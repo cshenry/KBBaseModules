@@ -128,6 +128,15 @@ class BaseModule:
             self.clients["AssemblyUtil"] = AssemblyUtil(self.callback_url,token=self.token)
         return self.clients["AssemblyUtil"]
     
+    def rast_client(self):
+        if "RAST_SDK" not in self.clients:
+            if "devenv" in self.config and self.config["devenv"] == "1":
+                from kbbasemodules import RAST_SDK
+            else:
+                from installed_clients.RAST_SDKClient import RAST_SDK
+            self.clients["RAST_SDK"] = RAST_SDK(self.callback_url,token=self.token)
+        return self.clients["RAST_SDK"]
+    
     def anno_client(self,native_python_api=False):
         if "cb_annotation_ontology_api" not in self.clients:
             if native_python_api:
