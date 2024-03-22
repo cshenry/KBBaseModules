@@ -90,11 +90,6 @@ class BaseModelingModule(BaseModule):
         if not output_ws:
             output_ws = ws
         rast_client = self.rast_client()
-        print({
-            "workspace": output_ws,
-            "input_genome":genome_id,
-            "output_genome":genome_id+".RAST"
-        })
         output = rast_client.annotate_genome({
             "workspace": output_ws,
             "input_genome":genome_id,
@@ -105,17 +100,22 @@ class BaseModelingModule(BaseModule):
     def get_msgenome_from_ontology(self,id_or_ref,ws=None,native_python_api=False,output_ws=None):
         annoapi = self.anno_client(native_python_api=native_python_api)
         gen_ref = self.create_ref(id_or_ref,ws)
+        genome_info = self.get_object_info(gen_ref)
         annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
             "input_ref" : gen_ref
         }),gen_ref,self.module_dir+"/data/")
         gene_term_hash = annoont.get_gene_term_hash(ontologies=["SSO"])
         if len(gene_term_hash) == 0:
             logger.warning("Genome has not been annotated with RAST! Reannotating genome with RAST!")
-            gen_ref = self.annotate_genome_with_rast(gen_ref,output_ws)
+            gen_ref = self.annotate_genome_with_rast(genome_info[1],genome_info[6],output_ws)
             annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
                 "input_ref" : gen_ref
             }),gen_ref,self.module_dir+"/data/")
-        return annoont.get_msgenome()
+        genome = annoont.get_msgenome()
+        genome.id = genome_info[1]
+        genome.info = genome_info
+        genome.scientific_name = genome_info[10]["Name"]
+        return 
 
     def get_msgenome(self,id_or_ref,ws=None):
         genome = self.kbase_api.get_from_ws(id_or_ref,ws)

@@ -266,6 +266,10 @@ class BaseModule:
         logger.warning("get_objects2 failed after multiple tries: %s", sys.exc_info()[0])
         raise
 
+    def get_object_info(self, id_or_ref, ws=None):
+        ws_identities = [self.process_ws_ids(id_or_ref, ws)]
+        return self.ws_client().get_object_info(ws_identities,1)[0]
+
     def get_object(self, id_or_ref, ws=None):
         res = self.ws_get_objects({"objects": [self.process_ws_ids(id_or_ref, ws)]})
         if res is None:
