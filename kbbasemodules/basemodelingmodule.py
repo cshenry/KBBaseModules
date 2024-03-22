@@ -97,7 +97,7 @@ class BaseModelingModule(BaseModule):
         })
         return output["workspace"]+"/"+output["id"]
     
-    def get_msgenome_from_ontology(self,id_or_ref,ws=None,native_python_api=False):
+    def get_msgenome_from_ontology(self,id_or_ref,ws=None,native_python_api=False,output_ws=None):
         annoapi = self.anno_client(native_python_api=native_python_api)
         gen_ref = self.create_ref(id_or_ref,ws)
         annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
@@ -105,7 +105,7 @@ class BaseModelingModule(BaseModule):
         }),gen_ref,self.module_dir+"/data/")
         if "SSO" not in annoont.ontologies or len(annoont.ontologies["SSO"]) == 0:
             logger.warning("Genome has not been annotated with RAST! Reannotating genome with RAST!")
-            gen_ref = self.annotate_genome_with_rast(gen_ref)
+            gen_ref = self.annotate_genome_with_rast(gen_ref,output_ws=None)
             annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
                 "input_ref" : gen_ref
             }),gen_ref,self.module_dir+"/data/")
