@@ -115,7 +115,7 @@ class BaseModelingModule(BaseModule):
         genome.id = genome_info[1]
         genome.info = genome_info
         genome.scientific_name = genome_info[10]["Name"]
-        return 
+        return genome
 
     def get_msgenome(self,id_or_ref,ws=None):
         genome = self.kbase_api.get_from_ws(id_or_ref,ws)
