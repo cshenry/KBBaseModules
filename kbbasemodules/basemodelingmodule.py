@@ -111,18 +111,10 @@ class BaseModelingModule(BaseModule):
             }),gen_ref,self.module_dir+"/data/")
         return annoont.get_msgenome()
 
-    def get_msgenome(self,id_or_ref,ws=None,from_ontology=False):
-        if from_ontology:
-            annoapi = self.anno_client(native_python_api=True)
-            annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
-                "input_ref" : gen_ref
-            }),gen_ref,self.module_dir+"/data/")
-            gene_term_hash = annoont.get_gene_term_hash(None,["SSO"],True,False)
-
-        else:
-            genome = self.kbase_api.get_from_ws(id_or_ref,ws)
-            genome.id = genome.info.id
-            self.input_objects.append(genome.info.reference)
+    def get_msgenome(self,id_or_ref,ws=None):
+        genome = self.kbase_api.get_from_ws(id_or_ref,ws)
+        genome.id = genome.info.id
+        self.input_objects.append(genome.info.reference)
         return genome
     
     def get_media(self,id_or_ref,ws=None):
