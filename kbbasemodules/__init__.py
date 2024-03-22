@@ -17,6 +17,7 @@ print("KBBaseModules", __version__)
 import kbbasemodules
 from kbbasemodules.clients import (
     DataFileUtil,
+    RAST_SDK,
     KBaseReport,
     chenry_utility_module,
     AssemblyUtil,

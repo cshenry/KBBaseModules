@@ -8,5 +8,6 @@ from kbbasemodules.clients.AssemblyUtilClient import AssemblyUtil
 from kbbasemodules.clients.cb_annotation_ontology_apiClient import cb_annotation_ontology_api
 from kbbasemodules.clients.GenomeFileUtilClient import GenomeFileUtil
 from kbbasemodules.clients.WorkspaceClient import Workspace
+from kbbasemodules.clients.RAST_SDKClient import RAST_SDK
 
 __version__ = "0.0.1"
