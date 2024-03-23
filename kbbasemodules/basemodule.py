@@ -38,10 +38,8 @@ class BaseModule:
         self.module_dir = module_dir
         #Initializing working directory if specified, otherwise using config scratch
         if working_dir:
-            print(name,working_dir," found")
             self.working_dir = working_dir
         else:
-            print(name,working_dir," not found")
             self.working_dir = config['scratch']
         self.reset_attributes()
     
