@@ -111,7 +111,16 @@ class BaseModelingModule(BaseModule):
             annoont = AnnotationOntology.from_kbase_data(annoapi.get_annotation_ontology_events({
                 "input_ref" : gen_ref
             }),gen_ref,self.module_dir+"/data/")
+        wsgenome = self.get_msgenome(gen_ref,ws)
         genome = annoont.get_msgenome()
+        for ftr in wsgenome.features:
+            if "functions" in ftr:
+                for func in ftr["functions"]:
+                    if ftr.id in genome.features:
+                        genome.features[ftr.id].add_ontology_term("RAST",func)
+                    else:
+                        newftr = genome.add_feature(ftr.id)
+                        newftr.add_ontology_term("RAST",func)
         genome.id = genome_info[1]
         genome.info = genome_info
         genome.scientific_name = genome_info[10]["Name"]
