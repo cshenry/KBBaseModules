@@ -119,7 +119,7 @@ class BaseModelingModule(BaseModule):
                 if ftr.id in genome.features:
                     genome.features[ftr.id].add_ontology_term("RAST",func)
                 else:
-                    newftr = genome.add_feature(ftr.id)
+                    newftr = genome.create_new_feature(ftr.id,"")
                     newftr.add_ontology_term("RAST",func)
         genome.id = genome_info[1]
         genome.scientific_name = genome_info[10]["Name"]
