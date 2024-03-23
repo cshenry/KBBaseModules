@@ -117,7 +117,7 @@ class BaseModelingModule(BaseModule):
         for ftr in wsgenome.features:
             for func in ftr.functions:
                 if ftr.id in genome.features:
-                    genome.features[ftr.id].add_ontology_term("RAST",func)
+                    genome.features.get_by_id(ftr.id).add_ontology_term("RAST",func)
                 else:
                     newftr = genome.create_new_feature(ftr.id,"")
                     newftr.add_ontology_term("RAST",func)
@@ -125,6 +125,10 @@ class BaseModelingModule(BaseModule):
         genome.scientific_name = genome_info[10]["Name"]
         return genome
 
+    def get_expression_objs(expression_refs,genome_objs):
+        expression_objs = {}
+        return expression_objs
+    
     def get_msgenome(self,id_or_ref,ws=None):
         genome = self.kbase_api.get_from_ws(id_or_ref,ws)
         genome.id = genome.info.id
