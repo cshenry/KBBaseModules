@@ -23,7 +23,7 @@ excluded_cpd = ["cpd22290","cpd11850"]
 
 class BaseModelingModule(BaseModule):
     def __init__(self,name,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
-        BaseModule.__init__(self,name,config,module_dir,working_dir,token,clients,callback)
+        BaseModule.__init__(self,name,config,module_dir=module_dir,working_dir=working_dir,token=token,clients=clients,callback=callback)
         self.version = "0.1.1.mm"
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
