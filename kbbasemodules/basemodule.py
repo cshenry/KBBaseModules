@@ -319,11 +319,11 @@ class BaseModule:
     #########REPORT RELATED FUNCTIONS#######################
     def save_report_to_kbase(self,height=700,message="",warnings=[],file_links=[],summary_height=None):
         rootDir = self.working_dir+"/html/"
-        files = [{'path': rootDir,'name': "index.html",'description': 'HTML report'}]
+        files = [{'path': "/kb/module/work/tmp/html/",'name': "index.html",'description': 'HTML report'}]
         for dirName, subdirList, fileList in os.walk(rootDir):
             for fname in fileList:
                 if fname != "index.html":
-                    files.append({'path': dirName,'name': fname,'description': 'Files related to HTML report'})
+                    files.append({'path': dirName.replace(rootDir,"/kb/module/work/tmp/html/"),'name': fname,'description': 'Files related to HTML report'})
         report_name = self.method+"-"+str(uuid.uuid4())
         output = self.report_client().create_extended_report({
             'message': message,
