@@ -9,6 +9,8 @@ from kbbasemodules.basemodule import BaseModule
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgenome import MSGenome
+from modelseedpy.core.msfba import MSFBA
+from modelseedpy.biochem.modelseed_biochem import ModelSEEDBiochem
 from modelseedpy.core.annotationontology import AnnotationOntology
 from modelseedpy.core.msgrowthphenotypes import MSGrowthPhenotypes
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
@@ -125,10 +127,41 @@ class BaseModelingModule(BaseModule):
         genome.scientific_name = genome_info[10]["Name"]
         return genome
 
-    def get_expression_objs(expression_refs,genome_objs):
+    def get_expression_objs(self,expression_refs,genome_objs):
+        genomes_to_models_hash = {}
+        for mdl in genome_objs:
+            genomes_to_models_hash[genome_objs[mdl]] = mdl
+        ftrhash = {}
         expression_objs = {}
+        for genome_obj in genomes_to_models_hash:
+            for ftr in genome_obj.features:
+                ftrhash[ftr.id] = genome_obj
+        for expression_ref in expression_refs:
+            expression_obj = self.kbase_api.get_from_ws(expression_ref,None)
+            row_ids = expression_obj.row_ids
+            genome_obj_count = {}
+            for ftr_id in row_ids:
+                if ftr_id in ftrhash:
+                    if ftrhash[ftr_id] not in genome_obj_count:
+                        genome_obj_count[ftrhash[ftr_id]] = 0
+                    genome_obj_count[ftrhash[ftr_id]] += 1
+            best_count = None
+            best_genome = None
+            for genome_obj in genome_obj_count:
+                if best_genome == None or genome_obj_count[genome_obj] > best_count:
+                    best_genome = genome_obj
+                    best_count = genome_obj_count[genome_obj]
+            if best_genome:
+                expression_objs[genomes_to_models_hash[best_genome]] = expression_obj.data    
         return expression_objs
     
+    def column_ids(self):
+        return self.data.columns.to_list()
+
+    @property
+    def row_ids(self):
+        return self.data.index.to_list()
+
     def get_msgenome(self,id_or_ref,ws=None):
         genome = self.kbase_api.get_from_ws(id_or_ref,ws)
         genome.id = genome.info.id
@@ -152,6 +185,77 @@ class BaseModelingModule(BaseModule):
         mdlutl = MSModelUtil(self.kbase_api.get_from_ws(id_or_ref,ws))
         mdlutl.wsid = mdlutl.model.info.id
         self.input_objects.append(mdlutl.model.info.reference)
+        return mdlutl
+    
+    def extend_model_with_other_ontologies(self,mdlutl,anno_ont,builder,prioritized_event_list=None,ontologies=None,merge_all=True):
+        gene_term_hash = anno_ont.get_gene_term_hash(
+            prioritized_event_list, ontologies, merge_all, False
+        )
+        residual_reaction_gene_hash = {}
+        for gene in gene_term_hash:
+            for term in gene_term_hash[gene]:
+                if term.ontology.id != "SSO":
+                    for rxn_id in term.msrxns:
+                        if rxn_id not in residual_reaction_gene_hash:
+                            residual_reaction_gene_hash[rxn_id] = {}
+                        if gene not in residual_reaction_gene_hash[rxn_id]:
+                            residual_reaction_gene_hash[rxn_id][gene] = []
+                        residual_reaction_gene_hash[rxn_id][gene] = gene_term_hash[
+                            gene
+                        ][term]
+
+        reactions = []
+        SBO_ANNOTATION = "sbo"
+        modelseeddb = ModelSEEDBiochem.get()
+        for rxn_id in residual_reaction_gene_hash:
+            if rxn_id + "_c0" not in mdlutl.model.reactions:
+                reaction = None
+                template_reaction = None
+                if rxn_id + "_c" in mdlutl.model.template.reactions:
+                    template_reaction = mdlutl.model.template.reactions.get_by_id(rxn_id + "_c")
+                elif rxn_id in modelseeddb.reactions:
+                    msrxn = modelseeddb.reactions.get_by_id(rxn_id)
+                    template_reaction = msrxn.to_template_reaction({0: "c", 1: "e"})
+                if template_reaction:
+                    for m in template_reaction.metabolites:
+                        if m.compartment not in builder.compartments:
+                            builder.compartments[
+                                m.compartment
+                            ] = builder.template.compartments.get_by_id(m.compartment)
+                        if m.id not in builder.template_species_to_model_species:
+                            model_metabolite = m.to_metabolite(builder.index)
+                            builder.template_species_to_model_species[
+                                m.id
+                            ] = model_metabolite
+                            builder.base_model.add_metabolites([model_metabolite])
+                    reaction = template_reaction.to_reaction(
+                        builder.base_model, builder.index
+                    )
+                    gpr = ""
+                    probability = None
+                    for gene in residual_reaction_gene_hash[rxn_id]:
+                        for item in residual_reaction_gene_hash[rxn_id][gene]:
+                            if "probability" in item["scores"]:
+                                if (
+                                    not probability
+                                    or item["scores"]["probability"] > probability
+                                ):
+                                    probability = item["scores"]["probability"]
+                        if len(gpr) > 0:
+                            gpr += " or "
+                        gpr += gene.id
+                    if hasattr(reaction, "probability"):
+                        reaction.probability = probability
+                    reaction.gene_reaction_rule = gpr
+                    reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
+                    reactions.append(reaction)
+                if not reaction:
+                    print("Reaction ", rxn_id, " not found in template or database!")
+            else:
+                #TODO - need to add gene associations to existing reactions
+                pass
+
+        mdlutl.model.add_reactions(reactions)
         return mdlutl
     
     #################Classifier functions#####################
@@ -222,6 +326,43 @@ class BaseModelingModule(BaseModule):
                     'data': data,
                     'name': objid,
                     'type': "KBaseFBA.FBAModel",
+                    'meta': {},
+                    'provenance': self.provenance()
+                }]
+            }
+            self.ws_client().save_objects(params)
+            self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
+
+    def save_solution_as_fba(self,fba_or_solution,mdlutl,media,workspace=None,objid=None,suffix=None):
+        if not isinstance(fba_or_solution,MSFBA):
+            if not suffix:
+                suffix = ".fba"
+            fba_or_solution = MSFBA(mdlutl,media,primary_solution=fba_or_solution,suffix=suffix)
+        else:
+            if not suffix:
+                suffix = ""
+            if objid:
+                objid += suffix
+        if not objid:
+            objid = fba_or_solution.wsid
+        if not objid:
+            logger.critical("Must provide an ID to save a model!")
+        fba_or_solution.wsid = objid
+        data = fba_or_solution.generate_kbase_data()
+        #If the workspace is None, then saving data to file
+        if not workspace:
+            self.print_json_debug_file(mdlutl.wsid+".json",data)
+        else:
+            #Setting the workspace
+            if workspace:
+                self.set_ws(workspace)
+            #Setting provenance and saving model using workspace API
+            params = {
+                'id':self.ws_id,
+                'objects': [{
+                    'data': data,
+                    'name': objid,
+                    'type': "KBaseFBA.FBA",
                     'meta': {},
                     'provenance': self.provenance()
                 }]
