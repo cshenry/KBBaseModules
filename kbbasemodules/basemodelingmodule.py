@@ -333,25 +333,14 @@ class BaseModelingModule(BaseModule):
             self.ws_client().save_objects(params)
             self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
 
-    def save_solution_as_fba(self,fba_or_solution,mdlutl,media,workspace=None,objid=None,suffix=None):
+    def save_solution_as_fba(self,fba_or_solution,mdlutl,media,fbaid,workspace=None,fbamodel_ref=None):
         if not isinstance(fba_or_solution,MSFBA):
-            if not suffix:
-                suffix = ".fba"
-            fba_or_solution = MSFBA(mdlutl,media,primary_solution=fba_or_solution,suffix=suffix)
-        else:
-            if not suffix:
-                suffix = ""
-            if objid:
-                objid += suffix
-        if not objid:
-            objid = fba_or_solution.wsid
-        if not objid:
-            logger.critical("Must provide an ID to save a model!")
-        fba_or_solution.wsid = objid
-        data = fba_or_solution.generate_kbase_data()
+            fba_or_solution = MSFBA(mdlutl,media,primary_solution=fba_or_solution)
+        fba_or_solution.id = fbaid
+        data = fba_or_solution.generate_kbase_data(fbamodel_ref,media.info.reference)
         #If the workspace is None, then saving data to file
-        if not workspace:
-            self.print_json_debug_file(mdlutl.wsid+".json",data)
+        if not workspace and self.util:
+            self.util.save(fbaid,data)
         else:
             #Setting the workspace
             if workspace:
@@ -361,11 +350,11 @@ class BaseModelingModule(BaseModule):
                 'id':self.ws_id,
                 'objects': [{
                     'data': data,
-                    'name': objid,
+                    'name': fbaid,
                     'type': "KBaseFBA.FBA",
                     'meta': {},
                     'provenance': self.provenance()
                 }]
             }
             self.ws_client().save_objects(params)
-            self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
+            self.obj_created.append({"ref":self.create_ref(fbaid,self.ws_name),"description":""})
