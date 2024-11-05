@@ -9,5 +9,6 @@ from kbbasemodules.clients.cb_annotation_ontology_apiClient import cb_annotation
 from kbbasemodules.clients.GenomeFileUtilClient import GenomeFileUtil
 from kbbasemodules.clients.WorkspaceClient import Workspace
 from kbbasemodules.clients.RAST_SDKClient import RAST_SDK
+from kbbasemodules.clients.AbstractHandleClient import AbstractHandle
 
 __version__ = "0.0.1"

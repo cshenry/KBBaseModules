@@ -22,5 +22,7 @@ from kbbasemodules.clients import (
     chenry_utility_module,
     AssemblyUtil,
     cb_annotation_ontology_api,
-    GenomeFileUtil
+    GenomeFileUtil,
+    AbstractHandle,
+    Workspace
 )

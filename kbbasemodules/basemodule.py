@@ -8,6 +8,7 @@ import re
 import time
 import sys
 import uuid
+import requests
 from os.path import exists
 #from json import JSONEncoder
 #class MyEncoder(JSONEncoder):
@@ -33,6 +34,7 @@ class BaseModule:
             "max_retry":3,
             "workspace-url":"https://kbase.us/services/ws",
         })
+        self.cached_to_obj_path = {}
         self.token = token
         self.name = name
         self.module_dir = module_dir
@@ -150,12 +152,22 @@ class BaseModule:
                 self.clients["cb_annotation_ontology_api"] = cb_annotation_ontology_api(self.callback_url,token=self.token)
         return self.clients["cb_annotation_ontology_api"]
     
+    def handle_service(self):
+        if "HandleService" not in self.clients:
+            if "devenv" in self.config and self.config["devenv"] == "1":
+                from kbbasemodules import AbstractHandle as HandleService
+            else:
+                from installed_clients.AbstractHandleClient import AbstractHandle as HandleService
+            self.clients["HandleService"] = HandleService("https://kbase.us/services/handle_service", token=self.token)
+        return self.clients["HandleService"]
+
     #########GENERAL UTILITY FUNCTIONS#######################
     def process_genome_list(self,input_references,workspace=None):
         ws_identities = []
         for ref in input_references:
             ws_identities.append(self.process_ws_ids(ref,workspace))
-        output = self.ws_client().get_object_info(ws_identities,1)
+        output = self.ws_client().get_object_info3({"objects":ws_identities,"includeMetadata":1})
+        output = output["infos"]
         output_references = []
         for info in output:
             if info[2].startswith("KBaseSearch.GenomeSet"):
@@ -229,6 +241,10 @@ class BaseModule:
         refs, IDs, and names for workspaces and objects
         """
         objspec = {}
+        if len(id_or_ref.split(";")) > 1:
+            objspec["to_obj_ref_path"] = id_or_ref.split(";")[0:-1]
+            id_or_ref = id_or_ref.split(";")[-1]
+
         if len(id_or_ref.split("/")) > 1:
             if no_ref:
                 array = id_or_ref.split("/")
@@ -316,6 +332,39 @@ class BaseModule:
             ws=str(ws)
         return ws+"/"+id_or_ref
     
+    def download_blob_file(self,handle_id,file_path,shock_url="https://kbase.us/services/shock-api"):
+        headers = {'Authorization': 'OAuth ' + self.token}
+        hs = self.handle_service()
+        handles = hs.hids_to_handles([handle_id])
+        shock_id = handles[0]['id']
+        node_url = shock_url + '/node/' + shock_id
+        r = requests.get(node_url, headers=headers, allow_redirects=True)
+        errtxt = ('Error downloading file from shock ' +
+                    'node {}: ').format(shock_id)
+        if not r.ok:
+            print(json.loads(r.content)['error'][0])
+            return None
+        resp_obj = r.json()
+        size = resp_obj['data']['file']['size']
+        if not size:
+            print('Node {} has no file'.format(shock_id))
+            return None
+        node_file_name = resp_obj['data']['file']['name']
+        attributes = resp_obj['data']['attributes']
+        if os.path.isdir(file_path):
+            file_path = os.path.join(file_path, node_file_name)
+        with open(file_path, 'wb') as fhandle:
+            with requests.get(node_url + '?download_raw', stream=True,
+                                headers=headers, allow_redirects=True) as r:
+                if not r.ok:
+                    print(json.loads(r.content)['error'][0])
+                    return None
+                for chunk in r.iter_content(1024):
+                    if not chunk:
+                        break
+                    fhandle.write(chunk)
+        return file_path
+
     #########REPORT RELATED FUNCTIONS#######################
     def save_report_to_kbase(self,height=700,message="",warnings=[],file_links=[],summary_height=None):
         rootDir = self.working_dir+"/html/"
