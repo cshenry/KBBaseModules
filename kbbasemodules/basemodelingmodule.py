@@ -333,10 +333,13 @@ class BaseModelingModule(BaseModule):
             self.ws_client().save_objects(params)
             self.obj_created.append({"ref":self.create_ref(objid,self.ws_name),"description":""})
 
-    def save_solution_as_fba(self,fba_or_solution,mdlutl,media,fbaid,workspace=None,fbamodel_ref=None):
+    def save_solution_as_fba(self,fba_or_solution,mdlutl,media,fbaid,workspace=None,fbamodel_ref=None,other_solutions=None):
         if not isinstance(fba_or_solution,MSFBA):
             fba_or_solution = MSFBA(mdlutl,media,primary_solution=fba_or_solution)
         fba_or_solution.id = fbaid
+        if other_solutions != None:
+            for other_solution in other_solutions:
+                fba_or_solution.add_secondary_solution(other_solution)
         data = fba_or_solution.generate_kbase_data(fbamodel_ref,media.info.reference)
         #If the workspace is None, then saving data to file
         if not workspace and self.util:
