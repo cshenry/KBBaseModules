@@ -34,13 +34,13 @@ class BaseModelingModule(BaseModule):
         self.kbase_api.ws_client = self.ws_client()
         #Loading default templates
         self.templates = {
-            "core" : "NewKBaseModelTemplates/Core-V5.1",
-            "gp" : "NewKBaseModelTemplates/GramPosModelTemplateV5",
-            "gn" : "NewKBaseModelTemplates/GramNegModelTemplateV5",
-            "ar" : "NewKBaseModelTemplates/ArchaeaTemplateV5",
-            "grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV5",
-            "gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV5",
-            "archaea" : "NewKBaseModelTemplates/ArchaeaTemplateV5",
+            "core" : "NewKBaseModelTemplates/Core-V5.2",
+            "gp" : "NewKBaseModelTemplates/GramPosModelTemplateV6",
+            "gn" : "NewKBaseModelTemplates/GramNegModelTemplateV6",
+            "ar" : "NewKBaseModelTemplates/ArchaeaTemplateV6",
+            "grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV6",
+            "gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV6",
+            "archaea" : "NewKBaseModelTemplates/ArchaeaTemplateV6",
             "old_grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV3",
             "old_gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV3",
             "custom": None
