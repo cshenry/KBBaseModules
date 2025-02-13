@@ -6,11 +6,15 @@ import sys
 import json
 import cobrakbase
 from kbbasemodules.basemodule import BaseModule
+import cobra
+from cobra import Model, Reaction, Metabolite
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core.msmodelutl import MSModelUtil
 from modelseedpy.core.msgenome import MSGenome
 from modelseedpy.core.msfba import MSFBA
 from modelseedpy.biochem.modelseed_biochem import ModelSEEDBiochem
+from modelseedpy.biochem.modelseed_reaction import ModelSEEDReaction2
+from modelseedpy.biochem.modelseed_compound import ModelSEEDCompound2
 from modelseedpy.core.annotationontology import AnnotationOntology
 from modelseedpy.core.msgrowthphenotypes import MSGrowthPhenotypes
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
@@ -207,6 +211,7 @@ class BaseModelingModule(BaseModule):
         reactions = []
         SBO_ANNOTATION = "sbo"
         modelseeddb = ModelSEEDBiochem.get()
+        biochemdbrxn = False
         for rxn_id in residual_reaction_gene_hash:
             if rxn_id + "_c0" not in mdlutl.model.reactions:
                 reaction = None
@@ -214,8 +219,57 @@ class BaseModelingModule(BaseModule):
                 if rxn_id + "_c" in mdlutl.model.template.reactions:
                     template_reaction = mdlutl.model.template.reactions.get_by_id(rxn_id + "_c")
                 elif rxn_id in modelseeddb.reactions:
-                    msrxn = modelseeddb.reactions.get_by_id(rxn_id)
-                    template_reaction = msrxn.to_template_reaction({0: "c", 1: "e"})
+                    rxnhash = modelseeddb.reactions[rxn_id]
+                    if "MI" not in rxnhash["status"] and "CI" not in rxnhash["status"]:
+                        upper_bound = 1000
+                        lower_bound = -1000
+                        if rxnhash["reversibility"] == ">":
+                            lower_bound = 0
+                        elif rxnhash["reversibility"] == "<":
+                            upper_bound = 0
+                        msrxn = ModelSEEDReaction2(
+                            rxn_id,
+                            name=rxnhash["name"],
+                            abbr=rxnhash["abbreviation"],
+                            lower_bound=lower_bound,
+                            upper_bound=upper_bound,
+                            delta_g=rxnhash["deltag"],
+                            delta_g_error=rxnhash["deltagerr"],
+                            is_obsolete=rxnhash["is_obsolete"],
+                            is_abstract=rxnhash["abstract_reaction"],
+                            status=rxnhash["status"],
+                            source=rxnhash["source"]
+                        )
+                        met_hash = {}
+                        reactants = rxnhash["stoichiometry"].split(";")
+                        for item in reactants:
+                            array = item.split(":")
+                            cpdhash = modelseeddb.compounds[array[1]]
+                            cmp = "_c"
+                            if array[2] == "1":
+                                cmp = "_e"
+                            if cpdhash["formula"] == None or str(cpdhash["formula"]) == "nan":
+                                cpdhash["formula"] = ""
+                            cpd = ModelSEEDCompound2(
+                                cpd_id=array[1],
+                                formula=cpdhash["formula"],
+                                name=cpdhash["name"],
+                                charge=0,#cpdhash["charge"],
+                                compartment=int(array[2]),
+                                abbr=cpdhash["abbreviation"],
+                                names=None,
+                                mass=cpdhash["mass"],
+                                delta_g=cpdhash["deltag"],
+                                delta_g_error=cpdhash["deltagerr"],
+                                is_core=False,
+                                is_obsolete=cpdhash["is_obsolete"],
+                                is_cofactor=cpdhash["is_cofactor"],
+                            )
+                            met_hash[cpd] = 1#float(array[0])
+                        msrxn.add_metabolites(met_hash)
+                        template_reaction = msrxn.to_template_reaction({0: "c", 1: "e"})
+                        biochemdbrxn = True
+                        #print(str(template_reaction))
                 if template_reaction:
                     for m in template_reaction.metabolites:
                         if m.compartment not in builder.compartments:
@@ -228,6 +282,9 @@ class BaseModelingModule(BaseModule):
                                 m.id
                             ] = model_metabolite
                             builder.base_model.add_metabolites([model_metabolite])
+                    if biochemdbrxn:
+                        pass
+                        #template_reaction.add_metabolites({})
                     reaction = template_reaction.to_reaction(
                         builder.base_model, builder.index
                     )
@@ -235,16 +292,17 @@ class BaseModelingModule(BaseModule):
                     probability = None
                     for gene in residual_reaction_gene_hash[rxn_id]:
                         for item in residual_reaction_gene_hash[rxn_id][gene]:
-                            if "probability" in item["scores"]:
-                                if (
-                                    not probability
-                                    or item["scores"]["probability"] > probability
-                                ):
-                                    probability = item["scores"]["probability"]
+                            if "scores" in item:
+                                if "probability" in item["scores"]:
+                                    if (
+                                        not probability
+                                        or item["scores"]["probability"] > probability
+                                    ):
+                                        probability = item["scores"]["probability"]
                         if len(gpr) > 0:
                             gpr += " or "
                         gpr += gene.id
-                    if hasattr(reaction, "probability"):
+                    if probability != None and hasattr(reaction, "probability"):
                         reaction.probability = probability
                     reaction.gene_reaction_rule = gpr
                     reaction.annotation[SBO_ANNOTATION] = "SBO:0000176"
@@ -252,9 +310,24 @@ class BaseModelingModule(BaseModule):
                 if not reaction:
                     print("Reaction ", rxn_id, " not found in template or database!")
             else:
-                #TODO - need to add gene associations to existing reactions
-                pass
-
+                rxn = mdlutl.model.reactions.get_by_id(rxn_id + "_c0")
+                gpr = rxn.gene_reaction_rule
+                probability = None
+                for gene in residual_reaction_gene_hash[rxn_id]:
+                    for item in residual_reaction_gene_hash[rxn_id][gene]:
+                        if "scores" in item:
+                            if "probability" in item["scores"]:
+                                if (
+                                    not probability
+                                    or item["scores"]["probability"] > probability
+                                ):
+                                    probability = item["scores"]["probability"]
+                    if len(gpr) > 0:
+                        gpr += " or "
+                    gpr += gene.id
+                if probability != None and hasattr(rxn, "probability"):
+                    rxn.probability = probability
+                rxn.gene_reaction_rule = gpr
         mdlutl.model.add_reactions(reactions)
         return mdlutl
     
