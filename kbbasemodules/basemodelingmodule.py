@@ -324,6 +324,10 @@ class BaseModelingModule(BaseModule):
 
     #################Save functions#####################
     def save_model(self,mdlutl,workspace=None,objid=None,suffix=None):
+        #Checking for zero flux reactions
+        for rxn in mdlutl.model.reactions:
+            if rxn.lower_bound == 0 and rxn.upper_bound == 0:
+                print("Zero flux reaction: "+rxn.id)
         #Setting the ID based on input
         if not suffix:
             suffix = ""

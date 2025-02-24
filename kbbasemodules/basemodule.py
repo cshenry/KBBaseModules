@@ -275,10 +275,11 @@ class BaseModule:
         while tries < self.config["max_retry"]:
             try:
                 return self.ws_client().get_objects2(args)
-            except:
-                logger.warning("Workspace get_objects2 call failed [%s:%s - %s]. Trying again!")
+            except Exception as e:
+                logger.warning("Workspace get_objects2 call failed [%s:%s - %s]. Trying again! Error: %s", 
+                       sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2], str(e))
                 tries += 1
-                time.sleep(500)  # Give half second
+                time.sleep(10)  # Give half second
         logger.warning("get_objects2 failed after multiple tries: %s", sys.exc_info()[0])
         raise
 
