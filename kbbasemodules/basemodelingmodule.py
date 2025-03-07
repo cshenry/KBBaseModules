@@ -91,6 +91,20 @@ class BaseModelingModule(BaseModule):
             media_objects.append(media)
         return media_objects
     
+    def create_minimal_medias(self,carbon_list,workspace,base_media="KBaseMedia/Carbon-D-Glucose"):
+        data = self.get_object(base_media)["data"]
+        for item in carbon_list:
+            self.save_json("Carbon-"+item,data)
+            copy = self.load_json("Carbon-"+item)
+            copy["id"] = "Carbon-"+item
+            copy["name"] = "Carbon-"+item
+            copy["source_id"] = "Carbon-"+item
+            copy["type"] = "MinimalCarbon"
+            for cpd in copy["mediacompounds"]:
+                if cpd["compound_ref"].split("/")[-1] == "cpd00027":
+                    cpd["compound_ref"] = cpd["compound_ref"].replace("cpd00027",carbon_list[item])
+            self.save_ws_object("Carbon-"+item,workspace,copy,"KBaseBiochem.Media")
+    
     #################Genome functions#####################
     def annotate_genome_with_rast(self,genome_id,ws=None,output_ws=None):
         if not output_ws:
@@ -195,6 +209,7 @@ class BaseModelingModule(BaseModule):
         gene_term_hash = anno_ont.get_gene_term_hash(
             prioritized_event_list, ontologies, merge_all, False
         )
+        self.print_json_debug_file("gene_term_hash",gene_term_hash)
         residual_reaction_gene_hash = {}
         for gene in gene_term_hash:
             for term in gene_term_hash[gene]:
@@ -204,9 +219,7 @@ class BaseModelingModule(BaseModule):
                             residual_reaction_gene_hash[rxn_id] = {}
                         if gene not in residual_reaction_gene_hash[rxn_id]:
                             residual_reaction_gene_hash[rxn_id][gene] = []
-                        residual_reaction_gene_hash[rxn_id][gene] = gene_term_hash[
-                            gene
-                        ][term]
+                        residual_reaction_gene_hash[rxn_id][gene] = gene_term_hash[gene][term]
 
         reactions = []
         SBO_ANNOTATION = "sbo"

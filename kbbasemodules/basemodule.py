@@ -204,8 +204,19 @@ class BaseModule:
         for key in key_list:
             if key in api_output:
                 output[key] = api_output[key]
-                
+
+    def save_json(self,name,data):
+        with open(self.working_dir+'/'+name+".json", 'w') as f:
+            json.dump(data, f,indent=4,skipkeys=True)
+
+    def load_json(self,name,default={}):
+        if exists(self.working_dir+'/'+name+".json"):
+            with open(self.working_dir+'/'+name+".json", 'r') as f:
+                return json.load(f)
+        return default
+    
     def print_json_debug_file(self,filename,data):
+        print("Printing debug file:",self.working_dir+'/'+filename)
         with open(self.working_dir+'/'+filename, 'w') as f:
             json.dump(data, f,indent=4,skipkeys=True)
     
@@ -352,6 +363,10 @@ class BaseModule:
             return None
         node_file_name = resp_obj['data']['file']['name']
         attributes = resp_obj['data']['attributes']
+        #Making the directory if it doesn't exist
+        dir = os.path.dirname(file_path)
+        os.makedirs(dir, exist_ok=True)
+        #Adding filename to the end of the directory
         if os.path.isdir(file_path):
             file_path = os.path.join(file_path, node_file_name)
         with open(file_path, 'wb') as fhandle:
