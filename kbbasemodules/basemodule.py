@@ -51,25 +51,22 @@ class BaseModule:
             self.obj_created = []
             self.input_objects = []
             self.method = method
-            self.params = copy.deepcopy(params)
-            for item in no_prov_params:
-                if item in self.params:
-                    del self.params[item]
+            filtered_params = {}
+            for key in params:
+                if key not in no_prov_params:
+                    filtered_params[key] = params[key]
+            self.params = copy.deepcopy(filtered_params)
             self.initialized = True
             if "workspace" in params:
                 self.set_ws(params["workspace"])
             elif "output_workspace" in params:
                 self.set_ws(params["output_workspace"])
             if print_params:
-                saved_data = {}
                 for item in no_print:
-                    if item in params:
-                        saved_data[item] = params[item]
-                        del params[item]
-                logger.info(method+":"+json.dumps(params,indent=4))
-                for item in saved_data:
-                    params[item] = saved_data[item]
-                
+                    if item in filtered_params:
+                        del filtered_params[item]
+                logger.info(method+":"+json.dumps(filtered_params,indent=4))
+
     def reset_attributes(self):
         #Initializing stores tracking objects created and input objects
         self.obj_created = []
@@ -293,6 +290,39 @@ class BaseModule:
                 time.sleep(10)  # Give half second
         logger.warning("get_objects2 failed after multiple tries: %s", sys.exc_info()[0])
         raise
+
+    def list_ws_objects(self, wsid_or_ref,type=None,include_metadata=True):
+        """
+        List objects in a workspace
+        """
+        ws_client = self.ws_client()
+        done = False
+        skip = 0
+        full_output = {}
+        start_after = None
+        while not done:
+            input = {}
+            if type:
+                input["type"] = type
+            if include_metadata:
+                input["includeMetadata"] = 1
+            else:
+                input["includeMetadata"] = 0
+            if isinstance(wsid_or_ref, int):
+                input["ids"] = [wsid_or_ref]
+                wsid_or_ref = str(wsid_or_ref)
+            else:
+                input["workspaces"] = [wsid_or_ref]
+
+            if start_after:
+                input["startafter"] = start_after
+            output = ws_client.list_objects(input)
+            start_after = wsid_or_ref+"/"+str(output[-1][0])
+            for item in output:
+                full_output[item[1]] = item
+            if len(output) < 5000:
+                done = True
+        return full_output
 
     def get_object_info(self, id_or_ref, ws=None):
         ws_identities = [self.process_ws_ids(id_or_ref, ws)]

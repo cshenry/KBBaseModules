@@ -36,14 +36,20 @@ class BaseModelingModule(BaseModule):
         self.kbase_api = cobrakbase.KBaseAPI(token=token)
         #self.kbase_api = cobrakbase.KBaseCache(token=token,dev=True)
         self.kbase_api.ws_client = self.ws_client()
+        #Loading default biochemistry
+        if "modelseedbiochem_directory" not in self.config or not self.config["modelseedbiochem_directory"]:
+            #Setting location of ModelSEEDBiochem on Sequoia as the default, as that is where the most diverse users are
+            self.config["modelseedbiochem_directory"] = "/scratch/shared/data/ModelSEEDDatabase"
+        print("Loading ModelSEEDBiochem from "+self.config["modelseedbiochem_directory"])
+        ModelSEEDBiochem.get(path=self.config["modelseedbiochem_directory"])
         #Loading default templates
         self.templates = {
             "core" : "NewKBaseModelTemplates/Core-V5.2",
             "gp" : "NewKBaseModelTemplates/GramPosModelTemplateV6",
-            "gn" : "NewKBaseModelTemplates/GramNegModelTemplateV6",
+            "gn" : "NewKBaseModelTemplates/GramNegModelTemplateV7",
             "ar" : "NewKBaseModelTemplates/ArchaeaTemplateV6",
             "grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV6",
-            "gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV6",
+            "gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV7",
             "archaea" : "NewKBaseModelTemplates/ArchaeaTemplateV6",
             "old_grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV3",
             "old_gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV3",
