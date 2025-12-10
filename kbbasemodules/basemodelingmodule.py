@@ -44,11 +44,11 @@ class BaseModelingModule(BaseModule):
         ModelSEEDBiochem.get(path=self.config["modelseedbiochem_directory"])
         #Loading default templates
         self.templates = {
-            "core" : "NewKBaseModelTemplates/Core-V5.2",
-            "gp" : "NewKBaseModelTemplates/GramPosModelTemplateV6",
+            "core" : "NewKBaseModelTemplates/Core-V6",
+            "gp" : "NewKBaseModelTemplates/GramPosModelTemplateV7",
             "gn" : "NewKBaseModelTemplates/GramNegModelTemplateV7",
             "ar" : "NewKBaseModelTemplates/ArchaeaTemplateV6",
-            "grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV6",
+            "grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV7",
             "gramneg" : "NewKBaseModelTemplates/GramNegModelTemplateV7",
             "archaea" : "NewKBaseModelTemplates/ArchaeaTemplateV6",
             "old_grampos" : "NewKBaseModelTemplates/GramPosModelTemplateV3",
